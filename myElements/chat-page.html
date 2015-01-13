@@ -1,0 +1,89 @@
+
+<link rel="import" href="../bower_components/core-list/core-list.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/core-header-panel/core-header-panel.html">
+<link rel="import"  href="../bower_components/core-toolbar/core-toolbar.html">
+<link rel="import"  href="../bower_components/paper-input/paper-input-decorator.html">
+
+<polymer-element name="chat-page" attributes="user">
+    <template>
+        <link rel="stylesheet" href="chat-page.css">
+        <div layout vertical fit>
+            <core-header-panel id="chatPage" lex>  <!--  mode="seamed"  to hide shadow-->
+                <core-toolbar class="toolbar animate">
+                    <paper-icon-button icon="arrow-back" on-click="{{goBack}}">
+                    </paper-icon-button>
+                    <!--<div id="title" flex>Chat with {{user.name}}</div>-->
+                    <div id="roomName" flex>Let's chat</div>
+                    <!--top right menu-->
+                    <div hero-id="name{{user.id}}" hero>{{user.name}}</div>
+                    <img class="user-avatar" width="70" height="70" src="images/avatar-{{user.id}}.svg" hero-id="avatar{{user.id}}" hero>
+                </core-toolbar>
+
+                <div id="listChat" fit hero-id="user{{user.id}}" hero >
+                    <paper-spinner active?={{activeSpinner}}></paper-spinner>
+                    <!--                    <core-list class="core-list-chat" data="{{messages}}"  
+                                                   runwayFactor="5">-->
+                    <template repeat="{{model in messages}}">
+                        <div class="chat"><span style="font-weight: bold">{{model.name}}</span>: <span>{{model.text}}</span></div> 
+                    </template>
+                    <!--</core-list>-->
+                </div>
+            </core-header-panel>
+            <paper-input-decorator label="Type then enter" floatingLabel>
+                <input is="core-input" on-keypress="{{messageInput_keydown}}">
+                </input>
+            </paper-input-decorator>
+        </div>
+    </template>
+    <script>
+        (function () {
+            Polymer('chat-page', {
+                created: function () {
+                    // Initialize and hint type to be array.
+                    this.messages = [];
+                    this.activeSpinner = true;
+                },
+                ready: function () {
+                    var self = this;
+                    window.myDataRef = new Firebase('https://glaring-heat-1826.firebaseIO.com/');
+
+                    myDataRef.on('child_added', function (snapshot) {
+                        if (self.activeSpinner) {
+                            self.activeSpinner = false;
+                        }
+                        var message = snapshot.val();
+                        console.log(message)
+                        self.messages.push(message);
+                    });
+                },
+                messageInput_keydown: function (e) {
+                    if (e.keyCode === 13) {
+                        var text = e.target.value;
+                        myDataRef.push({name: this.user.name, text: text});
+                        e.target.value = "";
+                    }
+                },
+                goBack: function () {
+                    this.fire('go-back');
+                },
+                transitionBegin: function () {
+                },
+                transitionEnd: function () {
+                },
+                userChanged: function (oldValue, newValue) {
+                    this.user_ = newValue;
+                },
+                messagesChanged: function (oldValue, newValue) {
+                    this.scrollToBottom();
+                },
+                scrollToBottom: function () {
+                    var $listChat = $(this.$.chatPage.scroller);
+                    $listChat.stop().animate({
+                        scrollTop: $listChat[0].scrollHeight
+                    }, 500);
+                }
+            });
+        })();
+    </script>
+</polymer-element>

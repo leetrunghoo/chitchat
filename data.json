@@ -1,0 +1,19 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "name": "Trung",
+            "status": "Nice to meet you"
+        },
+        {
+            "id": 2,
+            "name": "Jerry",
+            "status": "Catch me if you can"
+        },
+        {
+            "id": 3,
+            "name": "Tom",
+            "status": "You just wait!"
+        }
+    ]
+}

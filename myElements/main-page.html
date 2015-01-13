@@ -1,0 +1,97 @@
+
+<link rel="import" href="../bower_components/core-list/core-list.html">
+<link rel="import" href="../bower_components/core-menu/core-menu.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-dropdown/paper-dropdown.html">
+
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/core-drawer-panel/core-drawer-panel.html">
+<link rel="import" href="../bower_components/core-header-panel/core-header-panel.html">
+<link rel="import" href="../bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="../bower_components/core-image/core-image.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+
+<link rel="import" href="users-page.html">
+<link rel="import" href="chat-page.html">
+
+<polymer-element name="main-page">
+    <template id="mainPage">
+        <link rel="stylesheet" href="main-page.css">
+        <core-ajax id="ajax" url="data.json" response="{{users}}"></core-ajax>
+        <core-drawer-panel id="drawerPanel" >
+
+            <!-- Drawer -->
+            <core-header-panel drawer>
+                <core-image style="width:256px; height:170px; background-color: lightgray;"
+                            sizing="cover" preload fade src="http://lorempixel.com/256/170/abstract/"></core-image>
+                <core-menu selectedAttribute="">
+                    <paper-item on-click="{{goChat}}">
+                        <core-icon icon="assignment"></core-icon>
+                        <div>Info</div>
+                    </paper-item>
+                    <paper-item>
+                        <core-icon icon="account-circle"></core-icon>
+                        <div>Logout</div>
+                    </paper-item>
+                </core-menu>
+            </core-header-panel>
+
+            <!-- Main -->
+            <div main layout vertical>
+                <core-animated-pages id="pages" selected="{{selectedPage}}" fit
+                                     transitions="hero-transition cross-fade slide-from-right">
+                    <users-page id="page1" users="{{users}}" on-choose-user="{{goChat}}" on-toggle-drawer="{{openDrawer}}" 
+                                center center-justified layout ></users-page>
+
+                    <chat-page id="page2" user="{{user}}" on-go-back="{{goBack}}" on-click=""
+                               center center-justified layout ></chat-page>
+
+                </core-animated-pages>
+            </div>
+        </core-drawer-panel>
+    </template>
+    <script>
+        (function () {
+            Polymer('main-page', {
+                transitionBegin: function () {
+                },
+                transitionEnd: function () {
+                },
+                selectedPage: 0,
+                created: function () {
+                    // Initialize and hint type to be array.
+                    this.users = [
+                        {id: 1, name: "Trung", status: "Nice to meet you"},
+                        {id: 2, name: "Jerry", status: "Catch me if you can"},
+                        {id: 3, name: "Tom", status: "You just wait!"},
+                        {id: 4, name: "Terry", status: "Hello!"},
+                        {id: 5, name: "Bob", status: "I'm sad"},
+                        {id: 6, name: "Maria Ozawa", status: "My number: 090xxxxxx"},
+                        {id: 7, name: "Suzuki", status: "yo!"}
+                    ];
+                },
+                closeDrawer: function () {
+                    // Maybe this could wait till the next frame before animating
+                    // out... right now it animates while the list is rebuilding
+                    // and causes some jank
+                    this.$.drawerPanel.closeDrawer();
+                },
+                openDrawer: function () {
+                    this.$.drawerPanel.openDrawer();
+                },
+                goChat: function (e, detail, sender) {
+                    var userData = detail;
+                    if (userData) {
+                        this.user = userData;
+                        this.selectedPage = 1;
+                        this.closeDrawer();
+                        // TODO: pass roomId
+                    }
+                },
+                goBack: function (e, detail, sender) {
+                    this.selectedPage = 0;
+                }
+            });
+        })();
+    </script>
+</polymer-element>

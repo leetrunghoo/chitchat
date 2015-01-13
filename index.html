@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Chit Chat</title>
+        <meta name="description" content="">
+        <link rel="shortcut icon" type="image/x-icon" href="images/chat-logo.png">
+
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
+
+        <!-- Add to homescreen meta -->
+
+        <!-- Add to homescreen for Chrome on Android -->
+        <meta name="mobile-web-app-capable" content="yes">
+        <link rel="icon" sizes="192x192" href="images/chat-logo.png">
+
+        <!-- Add to homescreen for Safari on iOS -->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-precomposed.png">
+
+        <!-- Add to homescreen for Internet Explorer -->
+        <meta name="msapplication-TileImage" content="images/chat-logo.png">
+        <meta name="msapplication-TileColor" content="#3F51B5">
+
+        <!-- Conditionally load WC polyfills -->
+        <!-- Thanks to https://github.com/geelen/x-gif for the snippet -->
+        <!-- 1. Load platform support before any code that touches the DOM. -->
+        <script>
+            if ('registerElement' in document
+                    && 'createShadowRoot' in HTMLElement.prototype
+                    && 'import' in document.createElement('link')
+                    && 'content' in document.createElement('template')) {
+                // We're using a browser with native WC support!
+            } else {
+                document.write('<script src="bower_components/webcomponentsjs/webcomponents.js"><\/script>');
+            }
+        </script>
+        <!-- 2. Load the component using an HTML Import -->
+        <link rel="import" href="bower_components/core-ajax/core-ajax.html">
+        <link rel="import" href="bower_components/core-animated-pages/core-animated-pages.html">
+        <link rel="import" href="bower_components/core-animated-pages/transitions/hero-transition.html">
+        <link rel="import" href="bower_components/core-animated-pages/transitions/slide-from-right.html">
+        <link rel="import" href="bower_components/core-animated-pages/transitions/cross-fade.html">
+        <link rel="import" href="bower_components/paper-ripple/paper-ripple.html">
+        <link rel="import"  href="bower_components/paper-spinner/paper-spinner.html">
+
+        <link rel="import" href="myElements/main-page.html">
+
+        <link rel="stylesheet" href="css/theme-everest.css">
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body unresolved>
+
+
+        <!--<core-media-query query="min-width: 640px" queryMatches="{{largeScreen}}">-->
+        <!--</core-media-query>-->
+
+
+
+        <!--<section layout vertical>-->
+    <main-page class="page" id="main_page" users="{{users}}"
+               flex >
+    </main-page>
+    <!--</section>-->
+
+    <!--<nested-animated-pages></nested-animated-pages>-->
+
+    <!--<section layout vertical>-->
+    <!--</section>-->
+
+
+
+
+    <script src='js/firebase.js'></script>
+    <script src='js/jquery.min.js'></script>
+    <script src="js/main.js"></script>
+    <script>
+
+    </script>
+
+</body>
+</html>
