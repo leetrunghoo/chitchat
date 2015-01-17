@@ -11,7 +11,9 @@
                     <div id="roomName" flex>Let's chat</div>
                     <!--top right menu-->
                     <div hero-id="name{{user.id}}" hero>{{user.name}}</div>
-                    <img class="user-avatar" width="70" height="70" src="images/avatar-{{user.id}}.svg" hero-id="avatar{{user.id}}" hero>
+                    <template if="{{user.id > 0}}">
+                        <img class="user-avatar" width="70" height="70" src="images/avatar-{{user.id}}.svg" hero-id="avatar{{user.id}}" hero>
+                    </template>
                 </core-toolbar>
 
                 <div id="listChat" fit hero-id="user{{user.id}}" hero >
@@ -24,10 +26,15 @@
                     <!--</core-list>-->
                 </div>
             </core-header-panel>
-            <paper-input-decorator label="Type then enter" floatingLabel>
-                <input is="core-input" on-keypress="{{messageInput_keydown}}">
-                </input>
-            </paper-input-decorator>
+            <div horizontal layout >
+                <div horizontal layout center>
+                    <paper-icon-button id="btnSpeak" icon="keyboard-voice" on-click="{{turnOnSpeak}}" >
+                    </paper-icon-button>
+                </div>
+                <paper-input-decorator label="Type then enter" floatingLabel flex>
+                    <input is="core-input" on-keypress="{{messageInput_keydown}}" />
+                </paper-input-decorator>
+            </div>
         </div>
     </template>
     <script>
@@ -37,29 +44,47 @@
                     // Initialize and hint type to be array.
                     this.messages = [];
                     this.activeSpinner = true;
+                    this.autoSpeak = false;
                 },
                 ready: function () {
                     var self = this;
                     window.myDataRef = new Firebase('https://glaring-heat-1826.firebaseIO.com/');
-
+                    var timeout;
                     myDataRef.on('child_added', function (snapshot) {
                         if (self.activeSpinner) {
                             self.activeSpinner = false;
                         }
                         var message = snapshot.val();
-                        console.log(message)
                         self.messages.push(message);
+                        self.scrollToBottom();
+                        if (!timeout) {
+                            timeout = setTimeout(function () {
+                                self.autoSpeak = true;
+                            }, 1000);
+                        } else {
+                            if (self.autoSpeak && self.user && self.user.name !== message.name) { // TODO: check user ID
+                                speak(message.text);
+                            }
+                        }
                     });
+                },
+                goBack: function () {
+                    this.fire('go-back');
+                    this.autoSpeak = false;
                 },
                 messageInput_keydown: function (e) {
                     if (e.keyCode === 13) {
                         var text = e.target.value;
                         myDataRef.push({name: this.user.name, text: text});
                         e.target.value = "";
+                        speak(text);
                     }
                 },
-                goBack: function () {
-                    this.fire('go-back');
+                turnOnSpeak: function () {
+                    var self = this;
+                    listen(function (text) {
+                        myDataRef.push({name: self.user.name, text: text});
+                    });
                 },
                 transitionBegin: function () {
                 },
@@ -67,9 +92,6 @@
                 },
                 userChanged: function (oldValue, newValue) {
                     this.user_ = newValue;
-                },
-                messagesChanged: function (oldValue, newValue) {
-                    this.scrollToBottom();
                 },
                 scrollToBottom: function () {
                     var $listChat = $(this.$.chatPage.scroller);
