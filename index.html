@@ -34,6 +34,7 @@
                 // We're using a browser with native WC support!
             } else {
                 document.write('<script src="bower_components/webcomponentsjs/webcomponents.js"><\/script>');
+                document.write('<link rel="stylesheet" href="css/theme-everest1.css">');
             }
         </script>
         <!-- 2. Load the component using an HTML Import -->
@@ -55,9 +56,9 @@
         <link rel="import" href="bower_components/paper-ripple/paper-ripple.html">
         <link rel="import" href="bower_components/paper-spinner/paper-spinner.html">
         <link rel="import" href="bower_components/paper-input/paper-input-decorator.html">
-
-        <link rel="import" href="bower_components/voice-elements/dist/voice-player.html">
-        <link rel="import" href="bower_components/voice-elements/dist/voice-recognition.html">
+        <link rel="import" href="bower_components/paper-toast/paper-toast.html">
+        <link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+        <link rel="import" href="bower_components/paper-dialog/paper-action-dialog.html">
 
         <link rel="import" href="myElements/main-page.html">
 
@@ -72,6 +73,13 @@
     <main-page class="page" id="main_page" users="{{users}}"
                flex >
     </main-page>
+    
+    <paper-dialog id="popupMessage" backdrop autoCloseDisabled layered="false">
+        <div id="popupContent"></div>
+        <paper-button dismissive autofocus>Close</paper-button>
+    </paper-dialog>
+
+    <paper-toast id="toast1" text="Your draft has been discarded."></paper-toast>
 
     <script src='js/firebase.js'></script>
     <script src='js/jquery.min.js'></script>

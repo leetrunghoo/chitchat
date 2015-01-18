@@ -41,14 +41,28 @@ function listen(callback) {
     if (window.SpeechRecognition) {
         window.recognizer.onresult = function (event) {
             if (event.results.length > 0) {
-                    console.log(event.results);
+                console.log(event.results);
                 var text = event.results[0][0].transcript;
                 if (callback) {
-                    console.log("---------------text recognizer: "+text);
+                    console.log("---------------text recognizer: " + text);
                     callback(text);
                 }
             }
         };
         window.recognizer.start();
+    } else {
+        showToast("This browser doesn't support Web Speech API");
     }
+}
+
+function showPopupMessage(content) {
+    var popup = document.getElementById("#popupMessage");
+    var popContent = document.getElementById("#popupContent");
+    popContent.innerHTML = content;
+    popup.toggle();
+}
+
+function showToast(content) {
+    document.getElementById('toast1').setAttribute("text", content);
+    document.getElementById('toast1').show();
 }
