@@ -13,6 +13,7 @@
     "commit": "1022a3df858ae0f6bb3d98ea093f100f7bff4d8e"
   },
   "_source": "git://github.com/Polymer/core-image.git",
-  "_target": "^0.5.0",
-  "_originalSource": "Polymer/core-image"
+  "_target": "~0.5.2",
+  "_originalSource": "Polymer/core-image",
+  "_direct": true
 }

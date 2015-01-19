@@ -1,0 +1,9 @@
+{
+  "firebase": "chit",
+  "public": ".",
+  "ignore": [
+    "firebase.json",
+    "**/.*",
+    "**/node_modules/**"
+  ]
+}

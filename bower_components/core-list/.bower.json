@@ -45,6 +45,7 @@
     "commit": "f12064547f08e5e14a8084d7a8bdc8a8b975f5ad"
   },
   "_source": "git://github.com/Polymer/core-list.git",
-  "_target": "^0.5.0",
-  "_originalSource": "Polymer/core-list"
+  "_target": "~0.5.2",
+  "_originalSource": "Polymer/core-list",
+  "_direct": true
 }
