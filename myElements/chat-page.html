@@ -48,9 +48,8 @@
                 },
                 ready: function () {
                     var self = this;
-                    window.myDataRef = new Firebase('https://glaring-heat-1826.firebaseIO.com/');
                     var timeout;
-                    myDataRef.on('child_added', function (snapshot) {
+                    window.firebaseRef.on('child_added', function (snapshot) {
                         if (self.activeSpinner) {
                             self.activeSpinner = false;
                         }
@@ -75,7 +74,7 @@
                 messageInput_keydown: function (e) {
                     if (e.keyCode === 13) {
                         var text = e.target.value;
-                        myDataRef.push({name: this.user.name, text: text});
+                        window.firebaseRef.push({name: this.user.name, text: text});
                         e.target.value = "";
                         speak(text);
                     }
@@ -83,7 +82,7 @@
                 turnOnSpeak: function () {
                     var self = this;
                     listen(function (text) {
-                        myDataRef.push({name: self.user.name, text: text});
+                        window.firebaseRef.push({name: self.user.name, text: text});
                     });
                 },
                 transitionBegin: function () {

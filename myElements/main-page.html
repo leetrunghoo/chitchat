@@ -17,7 +17,11 @@
                         <core-icon icon="assignment"></core-icon>
                         <div>Info</div>
                     </paper-item>
-                    <paper-item>
+                    <paper-item on-click="{{goLoginPage}}">
+                        <core-icon icon="account-circle"></core-icon>
+                        <div>Login</div>
+                    </paper-item>
+                    <paper-item on-click="{{logout}}">
                         <core-icon icon="account-circle"></core-icon>
                         <div>Logout</div>
                     </paper-item>
@@ -28,7 +32,7 @@
             <div main layout vertical>
                 <core-animated-pages id="pages" selected="{{selectedPage}}" fit
                                      transitions="hero-transition cross-fade slide-from-right">
-                    <users-page id="page1" users="{{users}}" on-choose-user="{{goChat}}" on-toggle-drawer="{{openDrawer}}" 
+                    <users-page id="page1" users="{{users}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
                                 center center-justified layout ></users-page>
 
                     <chat-page id="page2" user="{{user}}" on-go-back="{{goBack}}" on-click=""
@@ -67,7 +71,7 @@
                 openDrawer: function () {
                     this.$.drawerPanel.openDrawer();
                 },
-                goChat: function (e, detail, sender) {
+                goChatPage: function (e, detail, sender) {
                     var userData = detail;
                     if (userData) {
                         this.user = userData;
@@ -78,6 +82,12 @@
                 },
                 goBack: function (e, detail, sender) {
                     this.selectedPage = 0;
+                },
+                goLoginPage: function (e, detail, sender) {
+                    login_oath("facebook")
+                },
+                logout: function (e, detail, sender) {
+                    logout();
                 }
             });
         })();
