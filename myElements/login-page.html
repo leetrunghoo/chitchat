@@ -1,0 +1,38 @@
+
+<polymer-element name="login-page">
+    <template>
+        <style>
+            :host {
+            }
+            #formLogin {
+                width: 100%;
+                min-height: 200px;
+                background: white;
+                max-width: 300px;
+                padding: 15px;
+            }
+        </style>
+        <div id="formLogin" center center-justified layout >
+            <paper-input-decorator label="Username" floatingLabel>
+                <input is="core-input"/>
+            </paper-input-decorator>
+            <paper-input-decorator label="Password" floatingLabel>
+                <input is="core-input"/>
+            </paper-input-decorator>
+            <paper-button raised  on-click="{{goBack}}">Login</paper-button>
+        </div>
+    </template>
+    <script>
+        (function() {
+            Polymer('login-page', {
+                login: function() {
+                    console.log("login!!");
+                    this.fire('login-action');
+                },
+                goBack: function () {
+                    this.fire('go-back');
+                }
+            });
+        })();
+    </script>
+</polymer-element>

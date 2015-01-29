@@ -1,6 +1,7 @@
 
 <link rel="import" href="users-page.html">
 <link rel="import" href="chat-page.html">
+<link rel="import" href="login-page.html">
 
 <polymer-element name="main-page">
     <template id="mainPage">
@@ -11,7 +12,7 @@
             <!-- Drawer -->
             <core-header-panel drawer>
                 <core-image style="width:256px; height:170px; background-color: lightgray;"
-                            sizing="cover" preload fade src="http://lorempixel.com/256/170/abstract/"></core-image>
+                            sizing="cover" preload fade src="../images/cover.jpg"></core-image>
                 <core-menu selectedAttribute="">
                     <paper-item on-click="{{goChat}}">
                         <core-icon icon="assignment"></core-icon>
@@ -32,10 +33,12 @@
             <div main layout vertical>
                 <core-animated-pages id="pages" selected="{{selectedPage}}" fit
                                      transitions="hero-transition cross-fade slide-from-right">
-                    <users-page id="page1" users="{{users}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
+                    <login-page id="page1" on-go-back="{{goUsersPage}}"
+                                center center-justified horizontal layout ></login-page>
+                    <users-page id="page2" users="{{users}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
                                 center center-justified layout ></users-page>
 
-                    <chat-page id="page2" user="{{user}}" on-go-back="{{goBack}}" on-click=""
+                    <chat-page id="page3" user="{{user}}" on-go-back="{{goUsersPage}}"
                                center center-justified layout ></chat-page>
 
                 </core-animated-pages>
@@ -80,7 +83,7 @@
                         // TODO: pass roomId
                     }
                 },
-                goBack: function (e, detail, sender) {
+                goUsersPage: function (e, detail, sender) {
                     this.selectedPage = 0;
                 },
                 goLoginPage: function (e, detail, sender) {
