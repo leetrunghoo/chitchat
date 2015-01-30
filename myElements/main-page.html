@@ -11,19 +11,27 @@
 
             <!-- Drawer -->
             <core-header-panel drawer>
-                <core-image style="width:256px; height:170px; background-color: lightgray;"
-                            sizing="cover" preload fade src="../images/cover.jpg"></core-image>
+                <core-image style="width:256px; height:100px; background-color: lightgray;"
+                            sizing="cover" preload fade src="../images/cover.jpg">
+                    <core-image style="width:70px; height:70px;"
+                                sizing="cover" preload fade src="{{userLogin.avatar}}">
+                    </core-image>
+                </core-image>
                 <core-menu selectedAttribute="">
+                    <paper-item on-click="{{goUsersPage}}">
+                        <core-icon icon="assignment"></core-icon>
+                        <div>Users page</div>
+                    </paper-item>
                     <paper-item on-click="{{goChat}}">
                         <core-icon icon="assignment"></core-icon>
-                        <div>Info</div>
+                        <div>Chat page</div>
                     </paper-item>
-                    <paper-item on-click="{{goLoginPage}}">
-                        <core-icon icon="account-circle"></core-icon>
+                    <paper-item on-click="{{goLoginPage}}" hidden?="{{logined}}">
+                                <core-icon icon="account-circle"></core-icon>
                         <div>Login</div>
                     </paper-item>
-                    <paper-item on-click="{{logout}}">
-                        <core-icon icon="account-circle"></core-icon>
+                    <paper-item on-click="{{logout}}" hidden?="{{!logined}}">
+                                <core-icon icon="account-circle"></core-icon>
                         <div>Logout</div>
                     </paper-item>
                 </core-menu>
@@ -33,7 +41,7 @@
             <div main layout vertical>
                 <core-animated-pages id="pages" selected="{{selectedPage}}" fit
                                      transitions="hero-transition cross-fade slide-from-right">
-                    <login-page id="page1" on-go-back="{{goUsersPage}}"
+                    <login-page id="page1" on-logined="{{goUsersPage}}"
                                 center center-justified horizontal layout ></login-page>
                     <users-page id="page2" users="{{users}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
                                 center center-justified layout ></users-page>
@@ -46,14 +54,18 @@
         </core-drawer-panel>
     </template>
     <script>
-        (function () {
+        (function() {
+            var self;
             Polymer('main-page', {
-                transitionBegin: function () {
+                transitionBegin: function() {
                 },
-                transitionEnd: function () {
+                transitionEnd: function() {
                 },
-                selectedPage: 0,
-                created: function () {
+                selectedPage: 1,
+                login: false,
+                userLogin: "",
+                ready: function() {
+                    self = this;
                     // Initialize and hint type to be array.
                     this.users = [
                         {id: 1, name: "Trung", status: "Nice to meet you"},
@@ -64,33 +76,63 @@
                         {id: 6, name: "Maria Ozawa", status: "My number: 090xxxxxx"},
                         {id: 7, name: "Suzuki", status: "yo!"}
                     ];
+                    // Register the callback to be fired every time auth state changes
+                    window.firebaseRef.onAuth(this.authDataCallback);
+//                    this.authDataCallback(window.firebaseRef.getAuth());
                 },
-                closeDrawer: function () {
+                authDataCallback: function(authData) {
+                    if (authData) {
+                        console.log("User is logged in with ", authData);
+                        self.userLogin = getUserProfile(authData);
+                        console.log("userLogin ", self.userLogin);
+                        self.goUsersPage();
+                        var url = window.firebaseUrl + "users/" + authData.uid + ".json";
+                        $.get(url, function(user) {
+                            if (user) {
+                                showToast("Welcome back " + self.userLogin.name);
+                            } else {
+                                showToast("Hello " + self.userLogin.name);
+                                window.firebaseRef.child("users").child(authData.uid).set(authData);
+                            }
+                        });
+                        self.logined = true;
+                    } else {
+                        console.log("User is logged out");
+                        self.logined = false;
+                        self.selectedPage = 0;
+                        self.userLogin = null;
+                    }
+                },
+                closeDrawer: function() {
                     // Maybe this could wait till the next frame before animating
                     // out... right now it animates while the list is rebuilding
                     // and causes some jank
                     this.$.drawerPanel.closeDrawer();
                 },
-                openDrawer: function () {
+                openDrawer: function() {
                     this.$.drawerPanel.openDrawer();
                 },
-                goChatPage: function (e, detail, sender) {
+                goChatPage: function(e, detail, sender) {
                     var userData = detail;
                     if (userData) {
                         this.user = userData;
-                        this.selectedPage = 1;
+                        this.selectedPage = 2;
                         this.closeDrawer();
                         // TODO: pass roomId
                     }
                 },
-                goUsersPage: function (e, detail, sender) {
+                goUsersPage: function(e, detail, sender) {
+                    this.selectedPage = 1;
+                    this.closeDrawer();
+                },
+                goLoginPage: function(e, detail, sender) {
                     this.selectedPage = 0;
+                    this.closeDrawer();
                 },
-                goLoginPage: function (e, detail, sender) {
-                    login_oath("facebook")
-                },
-                logout: function (e, detail, sender) {
-                    logout();
+                logout: function(e, detail, sender) {
+                    window.firebaseRef.unauth();
+                    this.goLoginPage();
+                    this.userLogin = null;
                 }
             });
         })();

@@ -38,26 +38,40 @@
         </div>
     </template>
     <script>
-        (function () {
+        (function() {
             Polymer('chat-page', {
-                created: function () {
+                created: function() {
                     // Initialize and hint type to be array.
                     this.messages = [];
                     this.activeSpinner = true;
                     this.autoSpeak = false;
                 },
-                ready: function () {
+                ready: function() {
+                    console.log(new Date());
                     var self = this;
                     var timeout;
-                    window.firebaseRef.on('child_added', function (snapshot) {
+                    var url = window.firebaseUrl + "chatRooms/public/.json";
+                    $.get(url, function(data) {
+                        if (self.activeSpinner) {
+                            self.activeSpinner = false;
+                        }
+                        if (data) {
+                            console.log('chat content: ', data);
+                        } else {
+                            console.log('chat content: ', data);
+                            window.firebaseRef.child("chatRooms").child("public").set({});
+                        }
+                    });
+                    window.firebaseRef.child('chatRooms').child('public').on('child_added', function(snapshot) {
                         if (self.activeSpinner) {
                             self.activeSpinner = false;
                         }
                         var message = snapshot.val();
+                        console.log('message', message);
                         self.messages.push(message);
                         self.scrollToBottom();
                         if (!timeout) {
-                            timeout = setTimeout(function () {
+                            timeout = setTimeout(function() {
                                 self.autoSpeak = true;
                             }, 1000);
                         } else {
@@ -67,32 +81,34 @@
                         }
                     });
                 },
-                goBack: function () {
+                goBack: function() {
                     this.fire('go-back');
                     this.autoSpeak = false;
                 },
-                messageInput_keydown: function (e) {
+                messageInput_keydown: function(e) {
                     if (e.keyCode === 13) {
                         var text = e.target.value;
-                        window.firebaseRef.push({name: this.user.name, text: text});
+                        var time = new Date().getTime();
+                        window.firebaseRef.child('chatRooms').child('public').push({name: this.user.name, text: text, time: time}); 
                         e.target.value = "";
                         speak(text);
                     }
                 },
-                turnOnSpeak: function () {
+                turnOnSpeak: function() {
                     var self = this;
-                    listen(function (text) {
-                        window.firebaseRef.push({name: self.user.name, text: text});
+                    listen(function(text) {
+                        var time = new Date().getTime();
+                        window.firebaseRef.child('chatRooms').child('public').push({name: self.user.name, text: text, time: time});
                     });
                 },
-                transitionBegin: function () {
+                transitionBegin: function() {
                 },
-                transitionEnd: function () {
+                transitionEnd: function() {
                 },
-                userChanged: function (oldValue, newValue) {
+                userChanged: function(oldValue, newValue) {
                     this.user_ = newValue;
                 },
-                scrollToBottom: function () {
+                scrollToBottom: function() {
                     var $listChat = $(this.$.chatPage.scroller);
                     $listChat.stop().animate({
                         scrollTop: $listChat[0].scrollHeight

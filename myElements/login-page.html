@@ -6,31 +6,107 @@
             }
             #formLogin {
                 width: 100%;
-                min-height: 200px;
+                height: 100%;
+                max-width: 480px;
+                max-height: 500px;
                 background: white;
-                max-width: 300px;
                 padding: 15px;
             }
+
+            #formLogin paper-input-decorator {
+                width: 100%;
+            }
+            #formLogin paper-button {
+                width: 100%;
+                margin: 0.75em 0;
+            }
+
+            .color-1 {
+                color: #28b99a;
+            }
+            .color-2 {
+                color: #34495e;
+            }
+
+            #quickLogin paper-icon-button / core-icon {
+                font-size: 3em;
+            }
+            #quickLogin paper-icon-button::shadow #icon {
+                width: 40px;
+                height: 40px;
+            }
         </style>
-        <div id="formLogin" center center-justified layout >
+        <div id="formLogin" center center-justified vertical layout >
+            <core-image style="width:100%; height:100px;" 
+                        sizing="contain" preload fade src="../images/chat-logo.png"></core-image>
+            <h3 style="text-align: center; color: #363636; margin: 0">Welcome to <br/>
+                <span class="color-2">Chit</span> <span class="color-1">Chat</span></h3>
             <paper-input-decorator label="Username" floatingLabel>
                 <input is="core-input"/>
             </paper-input-decorator>
             <paper-input-decorator label="Password" floatingLabel>
                 <input is="core-input"/>
             </paper-input-decorator>
-            <paper-button raised  on-click="{{goBack}}">Login</paper-button>
+            <paper-button primary raised on-click="{{login}}">Login</paper-button>
+            <div id="quickLogin">
+                <paper-icon-button style="color: #4a67a1" icon="social:post-facebook" title="login with facebook" 
+                                   data-provider="facebook" on-click="{{loginOath}}"></paper-icon-button>
+                <paper-icon-button style="color: #3B78E7" icon="social:post-twitter" title="login with twitter"
+                                   data-provider="twitter" on-click="{{loginOath}}"></paper-icon-button>
+                <paper-icon-button style="color: #d43c37" icon="social:post-gplus" title="login with google"
+                                   data-provider="google" on-click="{{loginOath}}"></paper-icon-button>
+                <paper-icon-button style="color: #363636" icon="social:post-github" title="login with github"
+                                   data-provider="github" on-click="{{loginOath}}"></paper-icon-button>
+            </div>
         </div>
     </template>
     <script>
         (function() {
+            var self;
             Polymer('login-page', {
+                ready: function() {
+                    self = this;
+                },
                 login: function() {
                     console.log("login!!");
-                    this.fire('login-action');
+//                    window.firebaseRef.authWithPassword({
+//                        email: username,
+//                        password: password
+//                    }, authHandler);
+                    this.fire('logined');
                 },
-                goBack: function () {
-                    this.fire('go-back');
+                loginOath: function(e) {
+                    console.log(e.target.getAttribute("data-provider"));
+                    var provider = e.target.getAttribute("data-provider");
+                    this.login_oath(provider, function() {
+                        this.fire('logined');
+                    });
+                },
+                login_oath: function(provider) {
+                    window.firebaseRef.authWithOAuthRedirect(provider, self.authHandler);
+                },
+                authHandler: function(error, authData) {
+                    if (error) {
+                        console.log("Login Failed!", error);
+                        switch (error.code) {
+                            case "INVALID_EMAIL":
+                                console.log("The specified user account email is invalid.");
+                                break;
+                            case "INVALID_PASSWORD":
+                                console.log("The specified user account password is incorrect.");
+                                break;
+                            case "INVALID_USER":
+                                console.log("The specified user account does not exist.");
+                                break;
+                            default:
+                                console.log("Error logging user in:", error);
+                        }
+                    } else {
+                        console.log("Authenticated successfully with payload:", authData);
+                        var user = getUserProfile(authData);
+                        console.log(user);
+                        this.fire('logined', user);
+                    }
                 }
             });
         })();

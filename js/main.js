@@ -3,7 +3,7 @@
     window.addEventListener('WebComponentsReady', function (e) {
         console.log('web componenets ready');
         // Set duration for core-animated-pages transitions
-        CoreStyle.g.transitions.duration = '1s';
+        CoreStyle.g.transitions.duration = '0.5s';
     });
 //        // Fired before a page transition occurs
 //        pages.addEventListener('core-animated-pages-transition-prepare', function () {
@@ -26,9 +26,7 @@
 
     window.firebaseUrl = 'https://chit.firebaseIO.com/';
     window.firebaseRef = new Firebase(window.firebaseUrl);
-    window.firebaseRef_users = window.firebaseRef.child("users");
-    // Register the callback to be fired every time auth state changes
-    window.firebaseRef.onAuth(authDataCallback);
+    
 })(window, document);
 function speak(textToSpeak) {
     // Create a new instance of SpeechSynthesisUtterance
@@ -70,62 +68,44 @@ function showToast(content) {
     document.getElementById('toast1').show();
 }
 
-// Create a callback which logs the current auth state
-function authDataCallback(authData) {
-    if (authData) {
-        console.log("User is logged in with ", authData);
-        var name = "";
-        if (authData.facebook) {
-            name = authData.facebook.displayName;
-        } else if (authData.google) {
-            name = authData.google.displayName;
-        }
-        var url = window.firebaseUrl+"users/"+authData.uid+".json";
-        $.get(url, function(user){
-            console.log("----check", user);
-            if (user) {
-                showToast("Welcome back " + name);
-            } else {
-                showToast("Hello " + name);
-                window.firebaseRef.child("users").child(authData.uid).set(authData);
-            }
-        });
-    } else {
-        console.log("User is logged out");
+function getDateTime(time) {
+    var today = new Date();
+    if (time) {
+        today = new Date(time);
     }
+    var cDate = today.getDate();
+    if (cDate < 10) {
+        cDate = "0" + cDate;
+    }
+    var cMonth = today.getMonth() + 1;
+    if (cMonth < 10) {
+        cMonth = "0" + cMonth;
+    }
+    var cYear = today.getFullYear();
+    
+    var hh = today.getHours();
+    if (hh < 10) {
+        hh = "0" + hh;
+    }
+    var mm = today.getMinutes();
+    if (mm < 10) {
+        mm = "0" + mm;
+    }
+    var ss = today.getSeconds();
+    if (ss < 10) {
+        ss = "0" + ss;
+    }   
+    return cYear + "/" + cMonth + "/" + cDate + " " + hh + ":"+mm+":"+ss;
 }
 
-function login(username, password) {
-    window.firebaseRef.authWithPassword({
-        email: username,
-        password: password
-    }, authHandler);
-}
-function login_oath(provider) {
-    window.firebaseRef.authWithOAuthRedirect(provider, authHandler);
-}
-// Create a callback to handle the result of the authentication
-function authHandler(error, authData) {
-    if (error) {
-        console.log("Login Failed!", error);
-        switch (error.code) {
-            case "INVALID_EMAIL":
-                console.log("The specified user account email is invalid.");
-                break;
-            case "INVALID_PASSWORD":
-                console.log("The specified user account password is incorrect.");
-                break;
-            case "INVALID_USER":
-                console.log("The specified user account does not exist.");
-                break;
-            default:
-                console.log("Error logging user in:", error);
-        }
-    } else {
-        console.log("Authenticated successfully with payload:", authData);
+function getUserProfile(authData){
+    var user = {
+        name: "",
+        avatar: ""
+    };
+    if (authData.facebook) {
+        user.name = authData.facebook.displayName;
+        user.avatar = "http://graph.facebook.com/"+authData.facebook.id+"/picture?width=100&height=100";
     }
-}
-
-function logout() {
-    window.firebaseRef.unauth();
+    return user;
 }
