@@ -1,0 +1,131 @@
+
+<polymer-element name="register-page">
+    <template>
+        <style>
+            :host {
+            }
+            #formRegister {
+                width: 100%;
+                height: 100%;
+                max-width: 480px;
+                max-height: 500px;
+                background: white;
+                padding: 15px;
+            }
+
+            #formRegister paper-input-decorator {
+                width: 100%;
+            }
+
+            .color-1 {
+                color: #28b99a;
+            }
+            .color-2 {
+                color: #34495e;
+            }
+
+            #selectorAvatar {
+                width: 100%;
+                height: 100px;
+                margin: 10px 0 20px 0;
+                overflow-x: auto;
+                white-space: normal;
+            }
+
+            #selectorAvatar .avatar {
+                width:70px; height:70px;
+                border-radius: 50%;
+                margin-right: 10px;
+                margin-bottom: 10px;
+                background-color: #f0f7e6;
+                display: inline-block;
+                border: 2px solid white;
+            }
+
+            #selectorAvatar .avatar.core-selected {
+                border: 2px solid #28b99a;
+            }
+        </style>
+        <div id="formRegister" center center-justified vertical layout >
+            <h3 style="text-align: center; color: #363636; margin: 10px 0 0 0" >REGISTER</h3>
+            <paper-input-decorator label="email" floatingLabel error="email is not valid">
+                <input is="core-input" type="email"  value='{{email}}' required on-blur="{{checkValid}}"/>
+            </paper-input-decorator>
+            <paper-input-decorator label="password" floatingLabel error="please input password">
+                <input is="core-input" type="password" value='{{password}}' required on-blur="{{checkValid}}"/>
+            </paper-input-decorator>
+            <paper-input-decorator label="nickname" floatingLabel error="please input nickname">
+                <input is="core-input"  value='{{nickname}}' required on-blur="{{checkValid}}"/>
+            </paper-input-decorator>
+            <h4 style="text-align: left; margin-top: 10px; width: 100%">Choose your avatar:</h4>
+            <core-selector selected="{{selectAvatar}}" id="selectorAvatar">
+                <template repeat="{{ava in avatars}}">
+                    <core-image sizing="cover" class="avatar" preload fade src="images/avatar-{{ava.id}}.svg"></core-image>
+                    <!--<div class="avatar" style="background-image: url(images/avatar-{{ava.id}}.svg)"></div>-->
+                </template>
+            </core-selector>
+            <paper-button primary raised on-click="{{register}}">OK, let's chat!</paper-button>
+            <paper-button secondary on-click="{{goBack}}" style="margin-top: 15px">Back</paper-button>
+        </div>
+    </template>
+    <script>
+        (function () {
+            var self;
+            Polymer('register-page', {
+                ready: function () {
+                    self = this;
+                    self.email = "";
+                    self.passworld = "";
+                    self.nickname = "";
+                    self.selectAvatar = 0;
+                    this.avatars = [
+                        {id: 1, url: ""},
+                        {id: 2, url: ""},
+                        {id: 3, url: ""},
+                        {id: 4, url: ""},
+                        {id: 5, url: ""},
+                        {id: 6, url: ""},
+                        {id: 7, url: ""},
+                        {id: 8, url: ""},
+                        {id: 9, url: ""}
+                    ];
+                },
+                register: function () {
+                    // create user
+                    var id = +self.selectAvatar + 1;
+                    var avatar = 'images/avatar-' + id + '.svg';
+                    window.firebaseRef.createUser({
+                        email: self.email,
+                        password: self.password
+                    }, function (error) {
+                        console.log("error", error);
+                        if (error === null) {
+                            console.log("User created successfully");
+                            // login!
+                            login_action(self.email, self.password, function (authData) {
+                                authData.password.name = self.nickname;
+                                authData.password.avatar = avatar;
+                                window.firebaseRef.child("users").child(authData.uid).update(authData, function () {
+                                    self.fire('registered');
+                                });
+                            });
+                        } else {
+                            console.log("Error creating user:", error);
+                            showDialog_error(error.message);
+                        }
+                    });
+                },
+                goBack: function () {
+                    console.log("back");
+                    this.fire('go-login');
+                },
+                checkValid: function (e) {
+                    if (!e.target.validity.valid)
+                        e.target.parentNode.isInvalid = true;
+                    else
+                        e.target.parentNode.isInvalid = false;
+                }
+            });
+        })();
+    </script>
+</polymer-element>

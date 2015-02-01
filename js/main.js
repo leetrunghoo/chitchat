@@ -26,7 +26,7 @@
 
     window.firebaseUrl = 'https://chit.firebaseIO.com/';
     window.firebaseRef = new Firebase(window.firebaseUrl);
-    
+
 })(window, document);
 function speak(textToSpeak) {
     // Create a new instance of SpeechSynthesisUtterance
@@ -64,8 +64,16 @@ function showPopupMessage(content) {
 }
 
 function showToast(content) {
-    document.getElementById('toast1').setAttribute("text", content);
-    document.getElementById('toast1').show();
+    document.getElementById('toast').setAttribute("text", content);
+    document.getElementById('toast').show();
+}
+function showDialog(content) {
+    document.getElementById('dialogContent').innerHTML = content;
+    document.getElementById('dialog').toggle();
+}
+function showDialog_error(content) {
+    document.getElementById('dialogContent').innerHTML = "<h4>Error:</h4>" + content;
+    document.getElementById('dialog').toggle();
 }
 
 function getDateTime(time) {
@@ -82,7 +90,7 @@ function getDateTime(time) {
         cMonth = "0" + cMonth;
     }
     var cYear = today.getFullYear();
-    
+
     var hh = today.getHours();
     if (hh < 10) {
         hh = "0" + hh;
@@ -94,18 +102,59 @@ function getDateTime(time) {
     var ss = today.getSeconds();
     if (ss < 10) {
         ss = "0" + ss;
-    }   
-    return cYear + "/" + cMonth + "/" + cDate + " " + hh + ":"+mm+":"+ss;
+    }
+    return cYear + "/" + cMonth + "/" + cDate + " " + hh + ":" + mm + ":" + ss;
 }
 
-function getUserProfile(authData){
+function getUserProfile(authData) {
     var user = {
         name: "",
         avatar: ""
     };
     if (authData.facebook) {
         user.name = authData.facebook.displayName;
-        user.avatar = "http://graph.facebook.com/"+authData.facebook.id+"/picture?width=100&height=100";
+        user.avatar = "http://graph.facebook.com/" + authData.facebook.id + "/picture?width=100&height=100";
+    } else if (authData.twitter) {
+        user.name = authData.twitter.displayName;
+        user.avatar = authData.twitter.cachedUserProfile.profile_image_url_https.replace("normal", "bigger");
+    } else if (authData.github) {
+        user.name = authData.github.displayName;
+        user.avatar = authData.github.cachedUserProfile.avatar_url;
+    } else if (authData.google) {
+        user.name = authData.google.displayName;
+        user.avatar = authData.google.cachedUserProfile.picture;
+    } else if (authData.password) {
+        user.name = authData.password.name;
+        user.avatar = authData.password.avatar;
     }
     return user;
+}
+
+function login_action(email, password, callback) {
+    window.firebaseRef.authWithPassword({
+        email: email,
+        password: password
+    }, function (error, authData) {
+        if (error) {
+            console.log("Login Failed!", error);
+            switch (error.code) {
+                case "INVALID_EMAIL":
+                    console.log("The specified user account email is invalid.");
+                    break;
+                case "INVALID_PASSWORD":
+                    console.log("The specified user account password is incorrect.");
+                    break;
+                case "INVALID_USER":
+                    console.log("The specified user account does not exist.");
+                    break;
+                default:
+                    console.log("Error logging user in:", error);
+            }
+            showDialog_error(error.message);
+        } else {
+            if (callback) {
+                callback(authData);
+            }
+        }
+    });
 }

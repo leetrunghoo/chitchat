@@ -1,7 +1,7 @@
 
 
 [drawer] {
-    background-color: #B99588;
+    background-color: #f0f7e6;
     border-right: 1px solid #ccc;
 }
 
@@ -11,4 +11,28 @@
 
 :host /deep/ paper-icon-button {
     margin: 0 !important;
+}
+
+#drawer_cover {
+    padding: 15px;
+    background-color: lightgray;
+    min-height:  100px;
+}
+
+.avatar {
+    width:70px; height:70px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background-color: #f0f7e6;
+}
+
+.avatar-name {
+    color: white;
+}
+
+:host /deep/ paper-button {
+    width: 100%;
+    margin: 0.75em 0;
+    text-align: center;
+    text-transform: none;
 }

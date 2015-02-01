@@ -2,6 +2,7 @@
 <link rel="import" href="users-page.html">
 <link rel="import" href="chat-page.html">
 <link rel="import" href="login-page.html">
+<link rel="import" href="register-page.html">
 
 <polymer-element name="main-page">
     <template id="mainPage">
@@ -11,11 +12,9 @@
 
             <!-- Drawer -->
             <core-header-panel drawer>
-                <core-image style="width:256px; height:100px; background-color: lightgray;"
-                            sizing="cover" preload fade src="../images/cover.jpg">
-                    <core-image style="width:70px; height:70px;"
-                                sizing="cover" preload fade src="{{userLogin.avatar}}">
-                    </core-image>
+                <core-image id="drawer_cover" sizing="cover" preload fade src="../images/cover.jpg" center-justified center horizontal layout >
+                    <core-image sizing="cover" class="avatar" preload fade hidden?="{{!userLogin.avatar}}" src="{{userLogin.avatar}}" placeholder="data:image/gif;base64,R0lGODdhyADIAOMAAO7u/5aWlqGho9jY5OPj8cLCyqyssLe3vc3N1wAAAAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAyADIAAAE/hDISau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru987//AoHBILBqPyKRyyWw6n9CodEqtWq/YrHbL7Xq/4LB4TC6bz+i0es1uu9/wuHxOr9vv+Lx+z+/7/4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS06kB1tYqA9cUBQEFrgLWAgIqBOEBFNuu1gMs2ugT3d/rAe0r77bsFwMGAQLzEggc8AcQAIJwA+EBuKbQmgF+3iocDHBAXiZ9Fd6dAxhuo4R3/gwnGDgnkqE1BBM0XrN3CSOFgQYM+ouHEsFMAP1i2lQIAN8EhwS6kZPQ74BMnpZcTgiHkoA1AhKxAWDaU+pHqwvrVVVI1ScmpRIwYjxwTqo+r1vTafV6FmtSrRXEak0ooB+8tjzR4v251m0llwSgUnUaAOrJtFMDoESrty9XxYi/wk0sMEBMoRKo7iRK8SiFxu285vQMoIDR0qdNN+rmbxxJlRFLi7u22OG1mDjP4bYb2uFVf+r0CZ+cyOS1oRD/cUM4cN5EA3bDhszqWOHEhBLIZh+qHdnmaFABwIwm9BxLZxAtn6fGvr379/Djy59Pv779+/jz69/Pv7///wAGQyjggAQWaOCBCCao4IIMNujggxBGKOGEFFZo4YUYZqjhhhx26OGHIIYo4ogklmjiiSimqOKKLLbo4oswxijjjDRKEQEAOw=="></core-image>
+                    <div class="avatar-name" flex>{{userLogin.name}}</div>
                 </core-image>
                 <core-menu selectedAttribute="">
                     <paper-item on-click="{{goUsersPage}}">
@@ -41,12 +40,13 @@
             <div main layout vertical>
                 <core-animated-pages id="pages" selected="{{selectedPage}}" fit
                                      transitions="hero-transition cross-fade slide-from-right">
-                    <login-page id="page1" on-logined="{{goUsersPage}}"
+                    <login-page on-logined="{{goUsersPage}}" on-go-register="{{goRegisterPage}}"
                                 center center-justified horizontal layout ></login-page>
-                    <users-page id="page2" users="{{users}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
+                    <register-page on-registered="{{goUsersPage}}" on-go-login="{{goLoginPage}}"
+                                   center center-justified horizontal layout ></register-page>
+                    <users-page users="{{users}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
                                 center center-justified layout ></users-page>
-
-                    <chat-page id="page3" user="{{user}}" on-go-back="{{goUsersPage}}"
+                    <chat-page user="{{user}}" on-go-back="{{goUsersPage}}"
                                center center-justified layout ></chat-page>
 
                 </core-animated-pages>
@@ -54,17 +54,17 @@
         </core-drawer-panel>
     </template>
     <script>
-        (function() {
+        (function () {
             var self;
             Polymer('main-page', {
-                transitionBegin: function() {
+                transitionBegin: function () {
                 },
-                transitionEnd: function() {
+                transitionEnd: function () {
                 },
                 selectedPage: 1,
                 login: false,
                 userLogin: "",
-                ready: function() {
+                ready: function () {
                     self = this;
                     // Initialize and hint type to be array.
                     this.users = [
@@ -80,21 +80,28 @@
                     window.firebaseRef.onAuth(this.authDataCallback);
 //                    this.authDataCallback(window.firebaseRef.getAuth());
                 },
-                authDataCallback: function(authData) {
+                authDataCallback: function (authData) {
                     if (authData) {
-                        console.log("User is logged in with ", authData);
+                        console.log("-----User is logged in with ", authData);
                         self.userLogin = getUserProfile(authData);
-                        console.log("userLogin ", self.userLogin);
                         self.goUsersPage();
-                        var url = window.firebaseUrl + "users/" + authData.uid + ".json";
-                        $.get(url, function(user) {
-                            if (user) {
-                                showToast("Welcome back " + self.userLogin.name);
-                            } else {
-                                showToast("Hello " + self.userLogin.name);
-                                window.firebaseRef.child("users").child(authData.uid).set(authData);
-                            }
-                        });
+                        var timeout = 0;
+                        if (authData.password) {
+                            timeout = 1000;
+                        }
+                        setTimeout(function () {
+                            var url = window.firebaseUrl + "users/" + authData.uid + ".json";
+                            $.get(url, function (data) {
+                                console.log("======User data ", data);
+                                if (data) {
+                                    self.userLogin = getUserProfile(data);
+                                    showToast("Welcome back " + self.userLogin.name);
+                                } else {
+                                    showToast("Hello " + self.userLogin.name);
+//                                window.firebaseRef.child("users").child(authData.uid).set(authData);
+                                }
+                            });
+                        }, timeout);
                         self.logined = true;
                     } else {
                         console.log("User is logged out");
@@ -103,33 +110,38 @@
                         self.userLogin = null;
                     }
                 },
-                closeDrawer: function() {
+                closeDrawer: function () {
                     // Maybe this could wait till the next frame before animating
                     // out... right now it animates while the list is rebuilding
                     // and causes some jank
                     this.$.drawerPanel.closeDrawer();
                 },
-                openDrawer: function() {
+                openDrawer: function () {
                     this.$.drawerPanel.openDrawer();
                 },
-                goChatPage: function(e, detail, sender) {
+                goChatPage: function (e, detail, sender) {
                     var userData = detail;
                     if (userData) {
                         this.user = userData;
-                        this.selectedPage = 2;
+                        this.selectedPage = 3;
                         this.closeDrawer();
                         // TODO: pass roomId
                     }
                 },
-                goUsersPage: function(e, detail, sender) {
-                    this.selectedPage = 1;
+                goUsersPage: function (e, detail, sender) {
+                    this.selectedPage = 2;
                     this.closeDrawer();
                 },
-                goLoginPage: function(e, detail, sender) {
+                goLoginPage: function (e, detail, sender) {
                     this.selectedPage = 0;
                     this.closeDrawer();
                 },
-                logout: function(e, detail, sender) {
+                goRegisterPage: function (e, detail, sender) {
+                    console.log("----------");
+                    this.selectedPage = 1;
+                    this.closeDrawer();
+                },
+                logout: function (e, detail, sender) {
                     window.firebaseRef.unauth();
                     this.goLoginPage();
                     this.userLogin = null;

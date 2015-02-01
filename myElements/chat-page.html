@@ -47,7 +47,6 @@
                     this.autoSpeak = false;
                 },
                 ready: function() {
-                    console.log(new Date());
                     var self = this;
                     var timeout;
                     var url = window.firebaseUrl + "chatRooms/public/.json";
@@ -56,9 +55,7 @@
                             self.activeSpinner = false;
                         }
                         if (data) {
-                            console.log('chat content: ', data);
                         } else {
-                            console.log('chat content: ', data);
                             window.firebaseRef.child("chatRooms").child("public").set({});
                         }
                     });
@@ -67,7 +64,6 @@
                             self.activeSpinner = false;
                         }
                         var message = snapshot.val();
-                        console.log('message', message);
                         self.messages.push(message);
                         self.scrollToBottom();
                         if (!timeout) {
