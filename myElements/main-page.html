@@ -44,7 +44,7 @@
                                 center center-justified horizontal layout ></login-page>
                     <register-page on-registered="{{goUsersPage}}" on-go-login="{{goLoginPage}}"
                                    center center-justified horizontal layout ></register-page>
-                    <users-page users="{{users}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
+                    <users-page users="{{users}}" userLogin="{{userLogin}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
                                 center center-justified layout ></users-page>
                     <chat-page user="{{user}}" on-go-back="{{goUsersPage}}"
                                center center-justified layout ></chat-page>
@@ -54,51 +54,55 @@
         </core-drawer-panel>
     </template>
     <script>
-        (function () {
+        (function() {
             var self;
             Polymer('main-page', {
-                transitionBegin: function () {
+                transitionBegin: function() {
                 },
-                transitionEnd: function () {
+                transitionEnd: function() {
                 },
                 selectedPage: 1,
                 login: false,
                 userLogin: "",
-                ready: function () {
+                ready: function() {
                     self = this;
                     // Initialize and hint type to be array.
-                    this.users = [
-                        {id: 1, name: "Trung", status: "Nice to meet you"},
-                        {id: 2, name: "Jerry", status: "Catch me if you can"},
-                        {id: 3, name: "Tom", status: "You just wait!"},
-                        {id: 4, name: "Terry", status: "Hello!"},
-                        {id: 5, name: "Bob", status: "I'm sad"},
-                        {id: 6, name: "Maria Ozawa", status: "My number: 090xxxxxx"},
-                        {id: 7, name: "Suzuki", status: "yo!"}
+                    self.users = [
+                        {id: 1, name: "Public Room", status: "Talk to everyone!", avatar: "images/avatar-16.svg"}
                     ];
                     // Register the callback to be fired every time auth state changes
                     window.firebaseRef.onAuth(this.authDataCallback);
 //                    this.authDataCallback(window.firebaseRef.getAuth());
+                    
+                    // update list Users
+                    window.firebaseRef.child('users').on('child_added', function(snapshot) {
+                        var user = snapshot.val();
+                        console.log("child_added user", getUserProfile(user));
+                        self.users.push(getUserProfile(user));
+                    });
                 },
-                authDataCallback: function (authData) {
+                authDataCallback: function(authData) {
                     if (authData) {
                         console.log("-----User is logged in with ", authData);
                         self.userLogin = getUserProfile(authData);
+                        console.log("-----------userLogin", self.userLogin);
                         self.goUsersPage();
+
                         var timeout = 0;
                         if (authData.password) {
-                            timeout = 1000;
+                            timeout = 500; // wait for updating user's info
                         }
-                        setTimeout(function () {
+                        setTimeout(function() {
                             var url = window.firebaseUrl + "users/" + authData.uid + ".json";
-                            $.get(url, function (data) {
-                                console.log("======User data ", data);
-                                if (data) {
-                                    self.userLogin = getUserProfile(data);
+                            $.get(url, function(userData) {
+                                console.log("======User data ", userData);
+                                if (userData) {
+                                    self.userLogin = getUserProfile(userData);
                                     showToast("Welcome back " + self.userLogin.name);
                                 } else {
                                     showToast("Hello " + self.userLogin.name);
-//                                window.firebaseRef.child("users").child(authData.uid).set(authData);
+                                    // create users
+                                    window.firebaseRef.child("users").child(authData.uid).set(authData);
                                 }
                             });
                         }, timeout);
@@ -110,16 +114,16 @@
                         self.userLogin = null;
                     }
                 },
-                closeDrawer: function () {
+                closeDrawer: function() {
                     // Maybe this could wait till the next frame before animating
                     // out... right now it animates while the list is rebuilding
                     // and causes some jank
                     this.$.drawerPanel.closeDrawer();
                 },
-                openDrawer: function () {
+                openDrawer: function() {
                     this.$.drawerPanel.openDrawer();
                 },
-                goChatPage: function (e, detail, sender) {
+                goChatPage: function(e, detail, sender) {
                     var userData = detail;
                     if (userData) {
                         this.user = userData;
@@ -128,20 +132,20 @@
                         // TODO: pass roomId
                     }
                 },
-                goUsersPage: function (e, detail, sender) {
+                goUsersPage: function(e, detail, sender) {
                     this.selectedPage = 2;
                     this.closeDrawer();
                 },
-                goLoginPage: function (e, detail, sender) {
+                goLoginPage: function(e, detail, sender) {
                     this.selectedPage = 0;
                     this.closeDrawer();
                 },
-                goRegisterPage: function (e, detail, sender) {
+                goRegisterPage: function(e, detail, sender) {
                     console.log("----------");
                     this.selectedPage = 1;
                     this.closeDrawer();
                 },
-                logout: function (e, detail, sender) {
+                logout: function(e, detail, sender) {
                     window.firebaseRef.unauth();
                     this.goLoginPage();
                     this.userLogin = null;

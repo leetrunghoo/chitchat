@@ -1,7 +1,7 @@
 
 <link rel="import" href="user-card.html">
 
-<polymer-element name="users-page" attributes="users">
+<polymer-element name="users-page" attributes="users, userLogin">
     <template>
         <style>
             #listUsers /deep/ user-card:last-child {
@@ -31,8 +31,8 @@
                     <!--                    <core-list data="{{users1}}"
                                                    runwayFactor="5">-->
                     <template repeat="{{model in users}}">
-                        <user-card on-tap="{{clickUserCard}}" hero-id="user{{model.id}}" hero >
-                            <img src="images/avatar-{{model.id}}.svg" hero-id="avatar{{model.id}}" hero />
+                        <user-card on-tap="{{clickUserCard}}" hero-id="user{{model.id}}" hero hidden?="{{userLogin.id === model.id}}">
+                            <img src="{{model.avatar}}" hero-id="avatar{{model.id}}" hero />
                             <h3 hero-id="name{{model.id}}" hero >{{model.name}}</h3>
                             <div cross-fade?={{model.id===selectedUser.id}}>{{model.status}}</div>
                         </user-card>

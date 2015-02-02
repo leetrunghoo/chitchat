@@ -76,40 +76,12 @@ function showDialog_error(content) {
     document.getElementById('dialog').toggle();
 }
 
-function getDateTime(time) {
-    var today = new Date();
-    if (time) {
-        today = new Date(time);
-    }
-    var cDate = today.getDate();
-    if (cDate < 10) {
-        cDate = "0" + cDate;
-    }
-    var cMonth = today.getMonth() + 1;
-    if (cMonth < 10) {
-        cMonth = "0" + cMonth;
-    }
-    var cYear = today.getFullYear();
-
-    var hh = today.getHours();
-    if (hh < 10) {
-        hh = "0" + hh;
-    }
-    var mm = today.getMinutes();
-    if (mm < 10) {
-        mm = "0" + mm;
-    }
-    var ss = today.getSeconds();
-    if (ss < 10) {
-        ss = "0" + ss;
-    }
-    return cYear + "/" + cMonth + "/" + cDate + " " + hh + ":" + mm + ":" + ss;
-}
-
 function getUserProfile(authData) {
     var user = {
+        id: authData.uid,
         name: "",
-        avatar: ""
+        avatar: "",
+        status: ""
     };
     if (authData.facebook) {
         user.name = authData.facebook.displayName;
@@ -157,4 +129,54 @@ function login_action(email, password, callback) {
             }
         }
     });
+}
+
+
+/** UTIL **/
+ 
+// check if an element exists in array using a comparer function
+// comparer : function(currentElement)
+Array.prototype.inArray = function(comparer) { 
+    for(var i=0; i < this.length; i++) { 
+        if(comparer(this[i])) return true; 
+    }
+    return false; 
+}; 
+
+// adds an element to the array if it does not already exist using a comparer function
+Array.prototype.pushIfNotExist = function(element, comparer) { 
+    if (!this.inArray(comparer)) {
+        this.push(element);
+    }
+}; 
+
+
+function getDateTime(time) {
+    var today = new Date();
+    if (time) {
+        today = new Date(time);
+    }
+    var cDate = today.getDate();
+    if (cDate < 10) {
+        cDate = "0" + cDate;
+    }
+    var cMonth = today.getMonth() + 1;
+    if (cMonth < 10) {
+        cMonth = "0" + cMonth;
+    }
+    var cYear = today.getFullYear();
+
+    var hh = today.getHours();
+    if (hh < 10) {
+        hh = "0" + hh;
+    }
+    var mm = today.getMinutes();
+    if (mm < 10) {
+        mm = "0" + mm;
+    }
+    var ss = today.getSeconds();
+    if (ss < 10) {
+        ss = "0" + ss;
+    }
+    return cYear + "/" + cMonth + "/" + cDate + " " + hh + ":" + mm + ":" + ss;
 }

@@ -11,9 +11,7 @@
                     <div id="roomName" flex>Let's chat</div>
                     <!--top right menu-->
                     <div hero-id="name{{user.id}}" hero>{{user.name}}</div>
-                    <template if="{{user.id > 0}}">
-                        <img class="user-avatar" width="70" height="70" src="images/avatar-{{user.id}}.svg" hero-id="avatar{{user.id}}" hero>
-                    </template>
+                    <img class="user-avatar" width="70" height="70" src="{{user.avatar}}" hero-id="avatar{{user.id}}" hero>
                 </core-toolbar>
 
                 <div id="listChat" fit hero-id="user{{user.id}}" hero >
@@ -85,7 +83,7 @@
                     if (e.keyCode === 13) {
                         var text = e.target.value;
                         var time = new Date().getTime();
-                        window.firebaseRef.child('chatRooms').child('public').push({name: this.user.name, text: text, time: time}); 
+                        window.firebaseRef.child('chatRooms').child('public').push({name: this.user.name, text: text, time: time});
                         e.target.value = "";
                         speak(text);
                     }
