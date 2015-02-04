@@ -34,7 +34,7 @@
                         <user-card on-tap="{{clickUserCard}}" hero-id="user{{model.id}}" hero hidden?="{{userLogin.id === model.id}}">
                             <img src="{{model.avatar}}" hero-id="avatar{{model.id}}" hero />
                             <h3 hero-id="name{{model.id}}" hero >{{model.name}}</h3>
-                            <div cross-fade?={{model.id===selectedUser.id}}>{{model.status}}</div>
+                            <div cross-fade?={{model.id===selectedUser.id}}>{{model.isOnline?'is online':'is offline'}}</div>
                         </user-card>
                     </template>
                     <!--</core-list>-->

@@ -1,5 +1,5 @@
 
-<polymer-element name="chat-page" attributes="user">
+<polymer-element name="chat-page" attributes="user, userLogin, roomId">
     <template>
         <link rel="stylesheet" href="chat-page.css">
         <div layout vertical fit>
@@ -37,6 +37,7 @@
     </template>
     <script>
         (function() {
+            var self;
             Polymer('chat-page', {
                 created: function() {
                     // Initialize and hint type to be array.
@@ -45,19 +46,48 @@
                     this.autoSpeak = false;
                 },
                 ready: function() {
-                    var self = this;
+                    self = this;
+                },
+                goBack: function() {
+                    this.fire('go-back');
+                    this.autoSpeak = false;
+                },
+                messageInput_keydown: function(e) {
+                    if (e.keyCode === 13) {
+                        var text = e.target.value;
+                        var time = new Date().getTime();
+                        self.roomRef.push({userId: this.userLogin.id, name: this.userLogin.name, text: text, time: time});
+                        e.target.value = "";
+                    }
+                },
+                turnOnSpeak: function() {
+                    listen(function(text) {
+                        var time = new Date().getTime();
+                        self.roomRef.push({name: self.userLogin.name, text: text, time: time});
+                    });
+                },
+                userChanged: function(oldValue, newValue) {
+                    this.user_ = newValue;
+                },
+                roomIdChanged: function(oldValue, newValue) {
+                    console.log("chat-page --- roomId: " + newValue);
+                    self.messages = [];
                     var timeout;
-                    var url = window.firebaseUrl + "chatRooms/public/.json";
+                    var url = window.firebaseUrl + "chatRooms/" + newValue + "/.json";
                     $.get(url, function(data) {
+                    console.log("data " + data);
                         if (self.activeSpinner) {
                             self.activeSpinner = false;
                         }
                         if (data) {
                         } else {
-                            window.firebaseRef.child("chatRooms").child("public").set({});
+//                            window.firebaseRef.child("chatRooms").child(newValue).set({});
                         }
                     });
-                    window.firebaseRef.child('chatRooms').child('public').on('child_added', function(snapshot) {
+                    
+                    // listen to message changed
+                    self.roomRef = window.firebaseRef.child('chatRooms').child(newValue);
+                    self.roomRef.on('child_added', function(snapshot) {
                         if (self.activeSpinner) {
                             self.activeSpinner = false;
                         }
@@ -69,38 +99,11 @@
                                 self.autoSpeak = true;
                             }, 1000);
                         } else {
-                            if (self.autoSpeak && self.user && self.user.name !== message.name) { // TODO: check user ID
+                            if (self.autoSpeak && self.userLogin && self.userLogin.name !== message.name) { // TODO: check user ID
                                 speak(message.text);
                             }
                         }
                     });
-                },
-                goBack: function() {
-                    this.fire('go-back');
-                    this.autoSpeak = false;
-                },
-                messageInput_keydown: function(e) {
-                    if (e.keyCode === 13) {
-                        var text = e.target.value;
-                        var time = new Date().getTime();
-                        window.firebaseRef.child('chatRooms').child('public').push({name: this.user.name, text: text, time: time});
-                        e.target.value = "";
-                        speak(text);
-                    }
-                },
-                turnOnSpeak: function() {
-                    var self = this;
-                    listen(function(text) {
-                        var time = new Date().getTime();
-                        window.firebaseRef.child('chatRooms').child('public').push({name: self.user.name, text: text, time: time});
-                    });
-                },
-                transitionBegin: function() {
-                },
-                transitionEnd: function() {
-                },
-                userChanged: function(oldValue, newValue) {
-                    this.user_ = newValue;
                 },
                 scrollToBottom: function() {
                     var $listChat = $(this.$.chatPage.scroller);

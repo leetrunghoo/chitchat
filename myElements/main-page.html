@@ -46,7 +46,7 @@
                                    center center-justified horizontal layout ></register-page>
                     <users-page users="{{users}}" userLogin="{{userLogin}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
                                 center center-justified layout ></users-page>
-                    <chat-page user="{{user}}" on-go-back="{{goUsersPage}}"
+                    <chat-page user="{{user}}" userLogin="{{userLogin}}" roomId="{{roomId}}" on-go-back="{{goUsersPage}}"
                                center center-justified layout ></chat-page>
 
                 </core-animated-pages>
@@ -68,22 +68,25 @@
                     self = this;
                     // Initialize and hint type to be array.
                     self.users = [
-                        {id: 1, name: "Public Room", status: "Talk to everyone!", avatar: "images/avatar-16.svg"}
+                        {id: "public", name: "Public Room", status: "Talk to everyone!", avatar: "images/group-icon.png"}
                     ];
                     // Register the callback to be fired every time auth state changes
                     window.firebaseRef.onAuth(this.authDataCallback);
 //                    this.authDataCallback(window.firebaseRef.getAuth());
-                    
+
                     // update list Users
-                    window.firebaseRef.child('users').on('child_added', function(snapshot) {
+                        window.firebaseRef.child('users').on('child_added', function(snapshot) {
                         var user = snapshot.val();
                         console.log("child_added user", getUserProfile(user));
+                        
+                        //TODO update STATUS
                         self.users.push(getUserProfile(user));
                     });
                 },
                 authDataCallback: function(authData) {
                     if (authData) {
                         console.log("-----User is logged in with ", authData);
+                        authData['isOnline'] = true;
                         self.userLogin = getUserProfile(authData);
                         console.log("-----------userLogin", self.userLogin);
                         self.goUsersPage();
@@ -102,8 +105,10 @@
                                 } else {
                                     showToast("Hello " + self.userLogin.name);
                                     // create users
-                                    window.firebaseRef.child("users").child(authData.uid).set(authData);
+//                                    window.firebaseRef.child("users").child(authData.uid).set(authData);
                                 }
+                                window.firebaseRef.child("users").child(authData.uid).remove();
+                                window.firebaseRef.child("users").child(authData.uid).set(authData);
                             });
                         }, timeout);
                         self.logined = true;
@@ -130,6 +135,12 @@
                         this.selectedPage = 3;
                         this.closeDrawer();
                         // TODO: pass roomId
+                        if (userData.id === "public") {
+                            this.roomId = userData.id;
+                        } else {
+                            this.roomId = (userData.id > this.userLogin.id) ? userData.id + "-" + this.userLogin.id : this.userLogin.id + "-" + userData.id;
+                        }
+                        console.log("roomId: " + this.roomId);
                     }
                 },
                 goUsersPage: function(e, detail, sender) {

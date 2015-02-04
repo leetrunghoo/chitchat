@@ -9,14 +9,16 @@
     /*background-color: #4F7DC9;*/
 }
 
-:host /deep/ paper-icon-button {
-    margin: 0 !important;
+* {
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    box-sizing:border-box;
 }
 
 #drawer_cover {
     padding: 15px;
     background-color: lightgray;
-    min-height:  100px;
+    height: 130px;
 }
 
 .avatar {
@@ -28,6 +30,10 @@
 
 .avatar-name {
     color: white;
+}
+
+:host /deep/ paper-icon-button {
+    margin: 0 !important;
 }
 
 :host /deep/ paper-button {

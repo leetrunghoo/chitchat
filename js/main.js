@@ -1,18 +1,10 @@
-(function (window, document, undefined) {
+(function(window, document, undefined) {
     'use strict';
-    window.addEventListener('WebComponentsReady', function (e) {
+    window.addEventListener('WebComponentsReady', function(e) {
         console.log('web componenets ready');
         // Set duration for core-animated-pages transitions
         CoreStyle.g.transitions.duration = '0.5s';
     });
-//        // Fired before a page transition occurs
-//        pages.addEventListener('core-animated-pages-transition-prepare', function () {
-//            pages.selectedItem.querySelector('.page').transitionBegin();
-//        });
-//        //Fired when a page transition completes.
-//        pages.addEventListener('core-animated-pages-transition-end', function () {
-//            pages.selectedItem.querySelector('.page').transitionEnd();
-//        });
 
 // Test browser support
     window.SpeechRecognition = window.SpeechRecognition ||
@@ -40,7 +32,7 @@ function speak(textToSpeak) {
 
 function listen(callback) {
     if (window.SpeechRecognition) {
-        window.recognizer.onresult = function (event) {
+        window.recognizer.onresult = function(event) {
             if (event.results.length > 0) {
                 console.log(event.results);
                 var text = event.results[0][0].transcript;
@@ -80,8 +72,7 @@ function getUserProfile(authData) {
     var user = {
         id: authData.uid,
         name: "",
-        avatar: "",
-        status: ""
+        avatar: ""
     };
     if (authData.facebook) {
         user.name = authData.facebook.displayName;
@@ -106,7 +97,7 @@ function login_action(email, password, callback) {
     window.firebaseRef.authWithPassword({
         email: email,
         password: password
-    }, function (error, authData) {
+    }, function(error, authData) {
         if (error) {
             console.log("Login Failed!", error);
             switch (error.code) {
@@ -131,24 +122,29 @@ function login_action(email, password, callback) {
     });
 }
 
+function playSound() {
+    var audio = new Audio('sound/noti.mp3');
+    audio.play();
+}
 
 /** UTIL **/
- 
+
 // check if an element exists in array using a comparer function
 // comparer : function(currentElement)
-Array.prototype.inArray = function(comparer) { 
-    for(var i=0; i < this.length; i++) { 
-        if(comparer(this[i])) return true; 
+Array.prototype.inArray = function(comparer) {
+    for (var i = 0; i < this.length; i++) {
+        if (comparer(this[i]))
+            return true;
     }
-    return false; 
-}; 
+    return false;
+};
 
 // adds an element to the array if it does not already exist using a comparer function
-Array.prototype.pushIfNotExist = function(element, comparer) { 
+Array.prototype.pushIfNotExist = function(element, comparer) {
     if (!this.inArray(comparer)) {
         this.push(element);
     }
-}; 
+};
 
 
 function getDateTime(time) {

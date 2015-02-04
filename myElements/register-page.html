@@ -15,6 +15,7 @@
 
             #formRegister paper-input-decorator {
                 width: 100%;
+                padding-bottom: 0;
             }
 
             .color-1 {
@@ -69,10 +70,10 @@
         </div>
     </template>
     <script>
-        (function () {
+        (function() {
             var self;
             Polymer('register-page', {
-                ready: function () {
+                ready: function() {
                     self = this;
                     self.email = "";
                     self.passworld = "";
@@ -90,22 +91,36 @@
                         {id: 9, url: ""}
                     ];
                 },
-                register: function () {
+                register: function(e) {
+                    var formRegister = e.target.parentNode;
+                    var inputs = formRegister.getElementsByTagName('input');
+                    var invalid = false;
+                    for (var i = 0; i < inputs.length; i++) {
+                        var input = inputs[i];
+                        self.checkValid1(input);
+                        if (input.parentNode.isInvalid) {
+                            invalid = true;
+                        }
+                    }
+                    if (invalid) {
+                        return;
+                    }
+
                     // create user
                     var id = +self.selectAvatar + 1;
                     var avatar = 'images/avatar-' + id + '.svg';
                     window.firebaseRef.createUser({
                         email: self.email,
                         password: self.password
-                    }, function (error) {
+                    }, function(error) {
                         console.log("error", error);
                         if (error === null) {
                             console.log("User created successfully");
                             // login!
-                            login_action(self.email, self.password, function (authData) {
+                            login_action(self.email, self.password, function(authData) {
                                 authData.password.name = self.nickname;
                                 authData.password.avatar = avatar;
-                                window.firebaseRef.child("users").child(authData.uid).update(authData, function () {
+                                window.firebaseRef.child("users").child(authData.uid).update(authData, function() {
                                     self.fire('registered');
                                 });
                             });
@@ -115,15 +130,21 @@
                         }
                     });
                 },
-                goBack: function () {
+                goBack: function() {
                     console.log("back");
                     this.fire('go-login');
                 },
-                checkValid: function (e) {
+                checkValid: function(e) {
                     if (!e.target.validity.valid)
                         e.target.parentNode.isInvalid = true;
                     else
                         e.target.parentNode.isInvalid = false;
+                },
+                checkValid1: function(element) {
+                    if (!element.validity.valid)
+                        element.parentNode.isInvalid = true;
+                    else
+                        element.parentNode.isInvalid = false;
                 }
             });
         })();
