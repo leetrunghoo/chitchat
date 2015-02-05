@@ -1,7 +1,7 @@
 
 <link rel="import" href="user-card.html">
 
-<polymer-element name="users-page" attributes="users, userLogin">
+<polymer-element name="users-page" attributes="users, userLogin, activeSpinner">
     <template>
         <style>
             #listUsers /deep/ user-card:last-child {
@@ -18,25 +18,28 @@
                     </paper-icon-button>
                     <div id="title" flex>Chit Chat</div>
                     <!--top right menu-->
-                    <!--                        <paper-menu-button id="menuBtn" noink>
-                                                <paper-icon-button icon="more-vert" noink></paper-icon-button>
-                                                <paper-dropdown class="dropdown" halign="right">
-                                                    <core-menu class="menu">
-                                                        <paper-item style="color: white">Don't touch me</paper-item>
-                                                    </core-menu>
-                                                </paper-dropdown>
-                                            </paper-menu-button>-->
+<!--                    <paper-menu-button id="menuBtn" noink>
+                        <paper-icon-button icon="more-vert" noink></paper-icon-button>
+                        <paper-dropdown class="dropdown" halign="right">
+                            <core-menu class="menu">
+                                <paper-item style="color: white">show online people</paper-item>
+                                <paper-item style="color: white">show offline people</paper-item>
+                                <paper-item style="color: white">show all</paper-item>
+                            </core-menu>
+                        </paper-dropdown>
+                    </paper-menu-button>-->
                 </core-toolbar>
                 <div id="listUsers" flex vertical layout center>
                     <!--                    <core-list data="{{users1}}"
                                                    runwayFactor="5">-->
                     <template repeat="{{model in users}}">
                         <user-card on-tap="{{clickUserCard}}" hero-id="user{{model.id}}" hero hidden?="{{userLogin.id === model.id}}">
-                            <img src="{{model.avatar}}" hero-id="avatar{{model.id}}" hero />
+                                   <img src="{{model.avatar}}" hero-id="avatar{{model.id}}" hero />
                             <h3 hero-id="name{{model.id}}" hero >{{model.name}}</h3>
-                            <div cross-fade?={{model.id===selectedUser.id}}>{{model.isOnline?'is online':'is offline'}}</div>
+                            <div class="{{model.statusClass}}" cross-fade?={{model.id===selectedUser.id}}>{{model.status}}</div>
                         </user-card>
                     </template>
+                    <paper-spinner active?={{activeSpinner}}></paper-spinner>
                     <!--</core-list>-->
                 </div>
             </core-header-panel>
@@ -60,7 +63,6 @@
                         // TODO: pass roomId
                     }
                 }
-
             });
         })();
     </script>

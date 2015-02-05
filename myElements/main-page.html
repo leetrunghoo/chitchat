@@ -16,24 +16,14 @@
                     <core-image sizing="cover" class="avatar" preload fade hidden?="{{!userLogin.avatar}}" src="{{userLogin.avatar}}" placeholder="data:image/gif;base64,R0lGODdhyADIAOMAAO7u/5aWlqGho9jY5OPj8cLCyqyssLe3vc3N1wAAAAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAyADIAAAE/hDISau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru987//AoHBILBqPyKRyyWw6n9CodEqtWq/YrHbL7Xq/4LB4TC6bz+i0es1uu9/wuHxOr9vv+Lx+z+/7/4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS06kB1tYqA9cUBQEFrgLWAgIqBOEBFNuu1gMs2ugT3d/rAe0r77bsFwMGAQLzEggc8AcQAIJwA+EBuKbQmgF+3iocDHBAXiZ9Fd6dAxhuo4R3/gwnGDgnkqE1BBM0XrN3CSOFgQYM+ouHEsFMAP1i2lQIAN8EhwS6kZPQ74BMnpZcTgiHkoA1AhKxAWDaU+pHqwvrVVVI1ScmpRIwYjxwTqo+r1vTafV6FmtSrRXEak0ooB+8tjzR4v251m0llwSgUnUaAOrJtFMDoESrty9XxYi/wk0sMEBMoRKo7iRK8SiFxu285vQMoIDR0qdNN+rmbxxJlRFLi7u22OG1mDjP4bYb2uFVf+r0CZ+cyOS1oRD/cUM4cN5EA3bDhszqWOHEhBLIZh+qHdnmaFABwIwm9BxLZxAtn6fGvr379/Djy59Pv779+/jz69/Pv7///wAGQyjggAQWaOCBCCao4IIMNujggxBGKOGEFFZo4YUYZqjhhhx26OGHIIYo4ogklmjiiSimqOKKLLbo4oswxijjjDRKEQEAOw=="></core-image>
                     <div class="avatar-name" flex>{{userLogin.name}}</div>
                 </core-image>
-                <core-menu selectedAttribute="">
-                    <paper-item on-click="{{goUsersPage}}">
-                        <core-icon icon="assignment"></core-icon>
-                        <div>Users page</div>
-                    </paper-item>
-                    <paper-item on-click="{{goChat}}">
-                        <core-icon icon="assignment"></core-icon>
-                        <div>Chat page</div>
-                    </paper-item>
-                    <paper-item on-click="{{goLoginPage}}" hidden?="{{logined}}">
-                                <core-icon icon="account-circle"></core-icon>
-                        <div>Login</div>
-                    </paper-item>
-                    <paper-item on-click="{{logout}}" hidden?="{{!logined}}">
-                                <core-icon icon="account-circle"></core-icon>
-                        <div>Logout</div>
-                    </paper-item>
-                </core-menu>
+                <paper-item on-click="{{goLoginPage}}" hidden?="{{logined}}">
+                            <core-icon icon="account-circle"></core-icon>
+                    <div>Login</div>
+                </paper-item>
+                <paper-item on-click="{{logout}}" hidden?="{{!logined}}">
+                            <core-icon icon="account-circle"></core-icon>
+                    <div>Logout</div>
+                </paper-item>
             </core-header-panel>
 
             <!-- Main -->
@@ -42,9 +32,9 @@
                                      transitions="hero-transition cross-fade slide-from-right">
                     <login-page on-logined="{{goUsersPage}}" on-go-register="{{goRegisterPage}}"
                                 center center-justified horizontal layout ></login-page>
-                    <register-page on-registered="{{goUsersPage}}" on-go-login="{{goLoginPage}}"
+                    <register-page on-go-login="{{goLoginPage}}"
                                    center center-justified horizontal layout ></register-page>
-                    <users-page users="{{users}}" userLogin="{{userLogin}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
+                    <users-page users="{{users}}" userLogin="{{userLogin}}" activeSpinner="{{activeSpinner}}" on-choose-user="{{goChatPage}}" on-toggle-drawer="{{openDrawer}}" 
                                 center center-justified layout ></users-page>
                     <chat-page user="{{user}}" userLogin="{{userLogin}}" roomId="{{roomId}}" on-go-back="{{goUsersPage}}"
                                center center-justified layout ></chat-page>
@@ -54,63 +44,71 @@
         </core-drawer-panel>
     </template>
     <script>
-        (function() {
+        (function () {
             var self;
             Polymer('main-page', {
-                transitionBegin: function() {
+                transitionBegin: function () {
                 },
-                transitionEnd: function() {
+                transitionEnd: function () {
                 },
                 selectedPage: 1,
                 login: false,
                 userLogin: "",
-                ready: function() {
+                activeSpinner: true,
+                ready: function () {
                     self = this;
                     // Initialize and hint type to be array.
                     self.users = [
-                        {id: "public", name: "Public Room", status: "Talk to everyone!", avatar: "images/group-icon.png"}
+                        {id: "public", name: "Public Room", status: "Talk to everyone!", avatar: "images/group-icon.png", isOnline: true}
                     ];
                     // Register the callback to be fired every time auth state changes
                     window.firebaseRef.onAuth(this.authDataCallback);
 //                    this.authDataCallback(window.firebaseRef.getAuth());
 
                     // update list Users
-                        window.firebaseRef.child('users').on('child_added', function(snapshot) {
-                        var user = snapshot.val();
-                        console.log("child_added user", getUserProfile(user));
-                        
+                    window.firebaseRef.child('users').on('value', function (snapshot) {
+                        self.activeSpinner = false;
+                        var users = snapshot.val();
+                        console.log("------------------------------------------------");
+                        console.log("===========all user", users);
+
                         //TODO update STATUS
-                        self.users.push(getUserProfile(user));
+                        var arrUsers = [
+                            {id: "public", name: "Public Room", status: "Talk to everyone!", avatar: "images/group-icon.png", isOnline: true}
+                        ];
+                        for (var user in users) {
+                            var user = users[user];
+                            console.log("-------------user: ", getUserProfile(user));
+                            arrUsers.push(getUserProfile(user));
+                        }
+                        self.users = arrUsers.sortByStatus();
                     });
                 },
-                authDataCallback: function(authData) {
+                authDataCallback: function (authData) {
                     if (authData) {
-                        console.log("-----User is logged in with ", authData);
-                        authData['isOnline'] = true;
+                        self.authData = authData;
+                        authData['status'] = 1;
                         self.userLogin = getUserProfile(authData);
-                        console.log("-----------userLogin", self.userLogin);
+                        console.log("-----------userLogin",  authData);
                         self.goUsersPage();
 
-                        var timeout = 0;
-                        if (authData.password) {
-                            timeout = 500; // wait for updating user's info
-                        }
-                        setTimeout(function() {
-                            var url = window.firebaseUrl + "users/" + authData.uid + ".json";
-                            $.get(url, function(userData) {
-                                console.log("======User data ", userData);
-                                if (userData) {
-                                    self.userLogin = getUserProfile(userData);
-                                    showToast("Welcome back " + self.userLogin.name);
-                                } else {
-                                    showToast("Hello " + self.userLogin.name);
-                                    // create users
-//                                    window.firebaseRef.child("users").child(authData.uid).set(authData);
-                                }
-                                window.firebaseRef.child("users").child(authData.uid).remove();
+                        var url = window.firebaseUrl + "users/" + authData.uid + ".json";
+                        $.get(url, function (userData) {
+                            console.log("======User data from REST ", userData);
+                            if (userData) {
+                                self.userLogin = getUserProfile(userData);
+                                showToast("Welcome back " + self.userLogin.name);
+                                // update status
+                                window.firebaseRef.child("users").child(authData.uid).update(authData);
+                            } else {
+                                // update status
                                 window.firebaseRef.child("users").child(authData.uid).set(authData);
-                            });
-                        }, timeout);
+                                if (self.userLogin.name) {
+                                    showToast("Hello " + self.userLogin.name);
+                                }
+                            }
+                        });
+
                         self.logined = true;
                     } else {
                         console.log("User is logged out");
@@ -119,16 +117,16 @@
                         self.userLogin = null;
                     }
                 },
-                closeDrawer: function() {
+                closeDrawer: function () {
                     // Maybe this could wait till the next frame before animating
                     // out... right now it animates while the list is rebuilding
                     // and causes some jank
                     this.$.drawerPanel.closeDrawer();
                 },
-                openDrawer: function() {
+                openDrawer: function () {
                     this.$.drawerPanel.openDrawer();
                 },
-                goChatPage: function(e, detail, sender) {
+                goChatPage: function (e, detail, sender) {
                     var userData = detail;
                     if (userData) {
                         this.user = userData;
@@ -138,28 +136,31 @@
                         if (userData.id === "public") {
                             this.roomId = userData.id;
                         } else {
-                            this.roomId = (userData.id > this.userLogin.id) ? userData.id + "-" + this.userLogin.id : this.userLogin.id + "-" + userData.id;
+                            this.roomId = (userData.id < this.userLogin.id) ? userData.id + "-" + this.userLogin.id : this.userLogin.id + "-" + userData.id;
                         }
                         console.log("roomId: " + this.roomId);
                     }
                 },
-                goUsersPage: function(e, detail, sender) {
+                goUsersPage: function (e, detail, sender) {
                     this.selectedPage = 2;
                     this.closeDrawer();
                 },
-                goLoginPage: function(e, detail, sender) {
+                goLoginPage: function (e, detail, sender) {
                     this.selectedPage = 0;
                     this.closeDrawer();
                 },
-                goRegisterPage: function(e, detail, sender) {
+                goRegisterPage: function (e, detail, sender) {
                     console.log("----------");
                     this.selectedPage = 1;
                     this.closeDrawer();
                 },
-                logout: function(e, detail, sender) {
+                logout: function (e, detail, sender) {
+                    console.log(self.authData);
+                    self.authData['status'] = 0;
+                    window.firebaseRef.child("users").child(self.userLogin.id).update(self.authData);
                     window.firebaseRef.unauth();
-                    this.goLoginPage();
-                    this.userLogin = null;
+                    self.goLoginPage();
+                    self.userLogin = null;
                 }
             });
         })();

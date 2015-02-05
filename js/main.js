@@ -1,6 +1,6 @@
-(function(window, document, undefined) {
+(function (window, document, undefined) {
     'use strict';
-    window.addEventListener('WebComponentsReady', function(e) {
+    window.addEventListener('WebComponentsReady', function (e) {
         console.log('web componenets ready');
         // Set duration for core-animated-pages transitions
         CoreStyle.g.transitions.duration = '0.5s';
@@ -32,7 +32,7 @@ function speak(textToSpeak) {
 
 function listen(callback) {
     if (window.SpeechRecognition) {
-        window.recognizer.onresult = function(event) {
+        window.recognizer.onresult = function (event) {
             if (event.results.length > 0) {
                 console.log(event.results);
                 var text = event.results[0][0].transcript;
@@ -71,8 +71,7 @@ function showDialog_error(content) {
 function getUserProfile(authData) {
     var user = {
         id: authData.uid,
-        name: "",
-        avatar: ""
+        statusClass: "status-"+authData.status
     };
     if (authData.facebook) {
         user.name = authData.facebook.displayName;
@@ -90,6 +89,14 @@ function getUserProfile(authData) {
         user.name = authData.password.name;
         user.avatar = authData.password.avatar;
     }
+    switch (authData.status) {
+        case 0: 
+        default:
+            user.status = " is offline";
+            break;
+        case 1: 
+            user.status = " is online";
+    }
     return user;
 }
 
@@ -97,7 +104,7 @@ function login_action(email, password, callback) {
     window.firebaseRef.authWithPassword({
         email: email,
         password: password
-    }, function(error, authData) {
+    }, function (error, authData) {
         if (error) {
             console.log("Login Failed!", error);
             switch (error.code) {
@@ -131,7 +138,7 @@ function playSound() {
 
 // check if an element exists in array using a comparer function
 // comparer : function(currentElement)
-Array.prototype.inArray = function(comparer) {
+Array.prototype.inArray = function (comparer) {
     for (var i = 0; i < this.length; i++) {
         if (comparer(this[i]))
             return true;
@@ -140,10 +147,21 @@ Array.prototype.inArray = function(comparer) {
 };
 
 // adds an element to the array if it does not already exist using a comparer function
-Array.prototype.pushIfNotExist = function(element, comparer) {
+Array.prototype.pushIfNotExist = function (element, comparer) {
     if (!this.inArray(comparer)) {
         this.push(element);
     }
+};
+
+Array.prototype.sortByStatus = function () {
+    function compare(a, b) {
+        if (a.status < b.status)
+            return 1;
+        if (a.status > b.status)
+            return -1;
+        return 0;
+    }
+    return this.sort(compare);
 };
 
 
