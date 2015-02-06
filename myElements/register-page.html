@@ -116,7 +116,7 @@
                         console.log("error", error);
                         if (error === null) {
                             console.log("User created successfully");
-                            var id = "simplelogin:"+self.email.replace(".", "-");
+                            var id = self.email.replace(".", "-");
                             // update user
                             var userData = {
                                 password: {

@@ -44,18 +44,18 @@
         </core-drawer-panel>
     </template>
     <script>
-        (function () {
+        (function() {
             var self;
             Polymer('main-page', {
-                transitionBegin: function () {
+                transitionBegin: function() {
                 },
-                transitionEnd: function () {
+                transitionEnd: function() {
                 },
                 selectedPage: 1,
                 login: false,
                 userLogin: "",
                 activeSpinner: true,
-                ready: function () {
+                ready: function() {
                     self = this;
                     // Initialize and hint type to be array.
                     self.users = [
@@ -66,12 +66,11 @@
 //                    this.authDataCallback(window.firebaseRef.getAuth());
 
                     // update list Users
-                    window.firebaseRef.child('users').on('value', function (snapshot) {
+                    window.firebaseRef.child('users').on('value', function(snapshot) {
                         self.activeSpinner = false;
                         var users = snapshot.val();
                         console.log("------------------------------------------------");
                         console.log("===========all user", users);
-
                         //TODO update STATUS
                         var arrUsers = [
                             {id: "public", name: "Public Room", status: "Talk to everyone!", avatar: "images/group-icon.png", isOnline: true}
@@ -84,31 +83,41 @@
                         self.users = arrUsers.sortByStatus();
                     });
                 },
-                authDataCallback: function (authData) {
+                authDataCallback: function(authData) {
                     if (authData) {
                         self.authData = authData;
                         authData['status'] = 1;
                         self.userLogin = getUserProfile(authData);
-                        console.log("-----------userLogin",  authData);
+                        console.log("-----------userLogin", authData);
                         self.goUsersPage();
+                        var id = authData.uid;
+                        if (authData.password) {
+                            id = authData.password.email.replace(".", "-");
+                        }
 
-                        var url = window.firebaseUrl + "users/" + authData.uid + ".json";
-                        $.get(url, function (userData) {
+                        var url = window.firebaseUrl + "users/" + id + ".json";
+                        $.get(url, function(userData) {
                             console.log("======User data from REST ", userData);
                             if (userData) {
                                 self.userLogin = getUserProfile(userData);
-                                showToast("Welcome back " + self.userLogin.name);
-                                // update status
-                                window.firebaseRef.child("users").child(authData.uid).update(authData);
+                                if (authData.password) {
+                                    userData['status'] = 1;
+                                    showToast("Hello " + self.userLogin.name);
+                                    // update status
+                                    window.firebaseRef.child("users").child(id).update(userData);
+                                } else {
+                                    showToast("Welcome back " + self.userLogin.name);
+                                    // update status
+                                    window.firebaseRef.child("users").child(id).update(authData);
+                                }
                             } else {
                                 // update status
-                                window.firebaseRef.child("users").child(authData.uid).set(authData);
+                                window.firebaseRef.child("users").child(id).set(authData);
                                 if (self.userLogin.name) {
                                     showToast("Hello " + self.userLogin.name);
                                 }
                             }
                         });
-
                         self.logined = true;
                     } else {
                         console.log("User is logged out");
@@ -117,16 +126,16 @@
                         self.userLogin = null;
                     }
                 },
-                closeDrawer: function () {
+                closeDrawer: function() {
                     // Maybe this could wait till the next frame before animating
                     // out... right now it animates while the list is rebuilding
                     // and causes some jank
                     this.$.drawerPanel.closeDrawer();
                 },
-                openDrawer: function () {
+                openDrawer: function() {
                     this.$.drawerPanel.openDrawer();
                 },
-                goChatPage: function (e, detail, sender) {
+                goChatPage: function(e, detail, sender) {
                     var userData = detail;
                     if (userData) {
                         this.user = userData;
@@ -141,20 +150,20 @@
                         console.log("roomId: " + this.roomId);
                     }
                 },
-                goUsersPage: function (e, detail, sender) {
+                goUsersPage: function(e, detail, sender) {
                     this.selectedPage = 2;
                     this.closeDrawer();
                 },
-                goLoginPage: function (e, detail, sender) {
+                goLoginPage: function(e, detail, sender) {
                     this.selectedPage = 0;
                     this.closeDrawer();
                 },
-                goRegisterPage: function (e, detail, sender) {
+                goRegisterPage: function(e, detail, sender) {
                     console.log("----------");
                     this.selectedPage = 1;
                     this.closeDrawer();
                 },
-                logout: function (e, detail, sender) {
+                logout: function(e, detail, sender) {
                     console.log(self.authData);
                     self.authData['status'] = 0;
                     window.firebaseRef.child("users").child(self.userLogin.id).update(self.authData);
