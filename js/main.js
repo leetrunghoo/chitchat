@@ -71,7 +71,7 @@ function showDialog_error(content) {
 function getUserProfile(authData) {
     var user = {
         id: authData.uid,
-        statusClass: "status-"+authData.status
+        statusClass: "status-" + authData.status
     };
     if (authData.facebook) {
         user.name = authData.facebook.displayName;
@@ -90,11 +90,11 @@ function getUserProfile(authData) {
         user.avatar = authData.password.avatar;
     }
     switch (authData.status) {
-        case 0: 
+        case 0:
         default:
             user.status = " is offline";
             break;
-        case 1: 
+        case 1:
             user.status = " is online";
     }
     return user;
@@ -132,6 +132,15 @@ function login_action(email, password, callback) {
 function playSound() {
     var audio = new Audio('sound/noti.mp3');
     audio.play();
+}
+
+function checkToPlaySound() {
+    // listen to message changed
+    var roomRef = window.firebaseRef.child('chatRooms');
+    roomRef.on('child_added', function (snapshot) {
+        console.log(snapshot.val());
+        playSound();
+    });
 }
 
 /** UTIL **/

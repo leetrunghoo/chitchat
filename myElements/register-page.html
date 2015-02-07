@@ -48,7 +48,7 @@
             }
         </style>
         <div id="formRegister" center center-justified vertical layout >
-            <h3 style="text-align: center; color: #363636; margin: 10px 0 0 0" >REGISTER</h3>
+            <h3 style="text-align:center;color:#363636;margin:0px;margin-top:20px" >REGISTER</h3>
             <paper-input-decorator label="email" floatingLabel error="email is not valid">
                 <input is="core-input" type="email"  value='{{email}}' required on-blur="{{checkValid}}"/>
             </paper-input-decorator>
@@ -58,7 +58,7 @@
             <paper-input-decorator label="nickname" floatingLabel error="please input nickname">
                 <input is="core-input"  value='{{nickname}}' required on-blur="{{checkValid}}"/>
             </paper-input-decorator>
-            <h4 style="text-align: left; margin-top: 10px; width: 100%">Choose your avatar:</h4>
+            <h4 style="text-align:left;margin-top:10px;width:100%">Choose your avatar:</h4>
             <core-selector selected="{{selectAvatar}}" id="selectorAvatar">
                 <template repeat="{{ava in avatars}}">
                     <core-image sizing="cover" class="avatar" preload fade src="images/avatar-{{ava.id}}.svg"></core-image>
@@ -66,7 +66,7 @@
                 </template>
             </core-selector>
             <paper-button primary raised on-click="{{register}}">OK, let's chat!</paper-button>
-            <paper-button secondary on-click="{{goBack}}" style="margin-top: 15px">Back</paper-button>
+            <paper-button secondary on-click="{{goBack}}" style="margin-top:15px">Back</paper-button>
         </div>
     </template>
     <script>

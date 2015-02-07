@@ -16,7 +16,7 @@
                     <!--                    <core-list class="core-list-chat" data="{{messages}}"  
                                                    runwayFactor="5">-->
                     <template repeat="{{model in messages}}">
-                        <div class="chat"><span style="font-weight: bold">{{model.name}}</span>: <span>{{model.text}}</span></div> 
+                        <div class="chat"><span style="font-weight:bold">{{model.name}}</span>: <span>{{model.text}}</span></div> 
                     </template>
                     <!--</core-list>-->
                 </div>
@@ -33,66 +33,65 @@
         </div>
     </template>
     <script>
-        (function() {
+        (function () {
             var self;
             Polymer('chat-page', {
-                created: function() {
+                created: function () {
                     // Initialize and hint type to be array.
                     this.messages = [];
-                    this.activeSpinner = true;
                     this.autoSpeak = false;
+                    this.activeSpinner = true;
+                    setTimeout(function () {
+                        this.activeSpinner = false;
+                    }, 5000);
                 },
-                ready: function() {
+                ready: function () {
                     self = this;
                 },
-                goBack: function() {
+                goBack: function () {
                     this.fire('go-back');
                     this.autoSpeak = false;
                 },
-                messageInput_keydown: function(e) {
+                messageInput_keydown: function (e) {
                     if (e.keyCode === 13) {
                         var text = e.target.value;
                         var time = new Date().getTime();
-                        self.roomRef.push({userId: this.userLogin.id, name: this.userLogin.name, text: text, time: time});
+                        self.roomRef.push({
+                            userId_from: this.userLogin.id, 
+                            userId_to: this.user.id, 
+                            name: this.userLogin.name, 
+                            text: text, 
+                            time: time});
                         e.target.value = "";
                     }
                 },
-                turnOnSpeak: function() {
-                    listen(function(text) {
+                turnOnSpeak: function () {
+                    listen(function (text) {
                         var time = new Date().getTime();
                         self.roomRef.push({name: self.userLogin.name, text: text, time: time});
                     });
                 },
-                userChanged: function(oldValue, newValue) {
+                userChanged: function (oldValue, newValue) {
                     this.user_ = newValue;
                 },
-                roomIdChanged: function(oldValue, newValue) {
+                roomIdChanged: function (oldValue, newValue) {
                     console.log("chat-page --- roomId: " + newValue);
                     self.messages = [];
                     var timeout;
-                    var url = window.firebaseUrl + "chatRooms/" + newValue + "/.json";
-                    $.get(url, function(data) {
-                    console.log("data " + data);
-                        if (self.activeSpinner) {
-                            self.activeSpinner = false;
-                        }
-                        if (data) {
-                        } else {
-//                            window.firebaseRef.child("chatRooms").child(newValue).set({});
-                        }
-                    });
-                    
+
                     // listen to message changed
                     self.roomRef = window.firebaseRef.child('chatRooms').child(newValue);
-                    self.roomRef.on('child_added', function(snapshot) {
+                    self.roomRef.on('child_added', function (snapshot) {
                         if (self.activeSpinner) {
                             self.activeSpinner = false;
                         }
                         var message = snapshot.val();
+                        console.log("message",message);
                         self.messages.push(message);
                         self.scrollToBottom();
                         if (!timeout) {
-                            timeout = setTimeout(function() {
+                            // set timeout to not speak the previous messages
+                            timeout = setTimeout(function () {
                                 self.autoSpeak = true;
                             }, 1000);
                         } else {
@@ -102,7 +101,7 @@
                         }
                     });
                 },
-                scrollToBottom: function() {
+                scrollToBottom: function () {
                     var $listChat = $(this.$.chatPage.scroller);
                     $listChat.stop().animate({
                         scrollTop: $listChat[0].scrollHeight
